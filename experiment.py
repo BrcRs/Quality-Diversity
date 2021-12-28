@@ -377,7 +377,7 @@ class Experiment:
         toolbox.register("map",futures.map)
         toolbox.decorate("mate", checkStrategy(self.custom_env["min_strategy"]))
         toolbox.decorate("mutate", checkStrategy(self.custom_env["min_strategy"]))
-        toolbox.register("evaluate", self.eval_nn, resdir=resdir)
+        toolbox.register("evaluate", self.eval_nn, env=env, resdir=resdir)
 
 
         population = toolbox.population(n=mu)

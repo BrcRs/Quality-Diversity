@@ -33,6 +33,7 @@ class Grid:
     def __init__(self):
         self.grid = dict()
     
+    @staticmethod
     def get_grid_coord(bd, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
         x,y = bd
         x = dim[0]*x//(max_v[0] - min_v[0])

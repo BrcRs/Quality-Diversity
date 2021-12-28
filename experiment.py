@@ -1,4 +1,4 @@
-# import cma
+import cma
 import gym#, gym_fastsim
 from deap import *
 import numpy as np
@@ -583,6 +583,24 @@ class Experiment:
                 pq = population + collection
             else:
                 pq = collection
+
+
+            ## Compute quality of offspring + pop (?)
+            # TODO adapt
+            for ind in pq:
+                if (self.custom_env['quality']=="FIT+NS"):
+                    ind.fitness.values=(ind.fit,ind.novelty)
+                elif (self.custom_env['quality']=="FIT"):
+                    ind.fitness.values=(ind.fit,)
+                elif (self.custom_env['quality']=="NS"):
+                    ind.fitness.values=(ind.novelty,)
+                elif (self.custom_env['quality']=="NSLC"):
+                    ind.fitness.values=(ind.novelty,ind.lc)
+
+                #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
+
+
+
             # TODO adapt here
             ## Case collection + no_sel
             # => generate pop at random
@@ -614,22 +632,9 @@ class Experiment:
                 select_pop = population + select_pop
 
 
-
-
-            ## Compute quality of offspring + pop (?)
-            # TODO adapt
-            for ind in pq:
-                if (self.custom_env['quality']=="FIT+NS"):
-                    ind.fitness.values=(ind.fit,ind.novelty)
-                elif (self.custom_env['quality']=="FIT"):
-                    ind.fitness.values=(ind.fit,)
-                elif (self.custom_env['quality']=="NS"):
-                    ind.fitness.values=(ind.novelty,)
-                elif (self.custom_env['quality']=="NSLC"):
-                    ind.fitness.values=(ind.novelty,ind.lc)
-
-                #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
     
+
+
             # Select the next generation population
             # TODO Selection is done here!
 
@@ -737,7 +742,7 @@ def main():
 
     # Being able to change considered value between fitness, novelty, curiosity, 
     # novelty & local quality
-    exp = Experiment(cont="Archive", sel="random", val="score")
+    exp = Experiment(cont="Archive", sel="random", val="NS")
     pop, logbook, paretofront, grid = exp.run()
 
 if __name__ == "__main__":

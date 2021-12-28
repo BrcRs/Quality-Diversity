@@ -221,13 +221,21 @@ class Experiment:
         self.custom_env['container'] = "undefined"
         self.custom_env['quality'] = "undefined"
         self.custom_env['selection'] = "undefined"
+
         self.custom_env['nov_add_strategy'] = "Cully"
+        # self.custom_env['nov_add_strategy'] = "random"
         if cont != None:
             self.set_container(cont)
         if sel != None:
             self.set_selection(sel)
         if val != None:
             self.set_value(val)
+
+    def set_add_strategy(self, strat):
+        the_valid = ["random", "novel", "Cully"]
+        if not strat in the_valid:
+            raise ValueError("ERROR: unknown add strategy(%s), valid alternatives are", the_valid, ""%(strat))
+        self.custom_env['nov_add_strategy'] = strat
 
     def set_container(self, cont_name):
         self.custom_env['container'] = cont_name
@@ -741,6 +749,7 @@ def main():
     # Being able to change considered value between fitness, novelty, curiosity, 
     # novelty & local quality
     exp = Experiment(cont="Archive", sel="random", val="NS")
+    exp.set_add_strategy("random")
     pop, logbook, paretofront, grid = exp.run()
 
 if __name__ == "__main__":

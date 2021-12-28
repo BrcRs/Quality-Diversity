@@ -737,7 +737,7 @@ def main():
 
     # Being able to change considered value between fitness, novelty, curiosity, 
     # novelty & local quality
-    exp = Experiment("fastsim_MAP_ELITES")
+    exp = Experiment(cont="Archive", sel="random", val="score")
     pop, logbook, paretofront, grid = exp.run()
 
 if __name__ == "__main__":

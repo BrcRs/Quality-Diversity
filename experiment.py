@@ -32,6 +32,25 @@ import os
 
 # import ea_dps
 
+# Individual generator
+def generateES(icls, scls, size, imin, imax, smin, smax):
+    ind = icls(random.uniform(imin, imax) for _ in range(size)) # Individual
+    ind.strategy = scls(random.uniform(smin, smax) for _ in range(size)) # Strategy
+    return ind
+
+def checkStrategy(minstrategy):
+    def decorator(func):
+        def wrappper(*args, **kargs):
+            children = func(*args, **kargs)
+            for child in children:
+                for i, s in enumerate(child.strategy):
+                    if s < minstrategy:
+                        child.strategy[i] = minstrategy
+            return children
+        return wrappper
+    return decorator
+
+
 class Experiment:
     registered_envs={}
 
@@ -301,27 +320,6 @@ class Experiment:
         return episode_reward, episode_bd, episode_log
 
 
-    # Individual generator
-    def generateES(icls, scls, size, imin, imax, smin, smax):
-        ind = icls(random.uniform(imin, imax) for _ in range(size)) # Individual
-        ind.strategy = scls(random.uniform(smin, smax) for _ in range(size)) # Strategy
-        return ind
-
-    def checkStrategy(minstrategy):
-        def decorator(func):
-            def wrappper(*args, **kargs):
-                children = func(*args, **kargs)
-                for child in children:
-                    for i, s in enumerate(child.strategy):
-                        if s < minstrategy:
-                            child.strategy[i] = minstrategy
-                return children
-            return wrappper
-        return decorator
-
-
-
-
 
 
 
@@ -363,7 +361,7 @@ class Experiment:
 
         # Preparation of the EA with the DEAP framework. See https://deap.readthedocs.io for more details.
         toolbox = base.Toolbox()
-        toolbox.register("individual", self.generateES, creator.Individual, creator.Strategy, IND_SIZE, 
+        toolbox.register("individual", generateES, creator.Individual, creator.Strategy, IND_SIZE, 
                         self.custom_env["min_value"], 
                         self.custom_env["max_value"], 
                         self.custom_env["min_strategy"], 
@@ -377,8 +375,8 @@ class Experiment:
         toolbox.register("select", tools.selNSGA2)
         
         toolbox.register("map",futures.map)
-        toolbox.decorate("mate", self.checkStrategy(self.custom_env["min_strategy"]))
-        toolbox.decorate("mutate", self.checkStrategy(self.custom_env["min_strategy"]))
+        toolbox.decorate("mate", checkStrategy(self.custom_env["min_strategy"]))
+        toolbox.decorate("mutate", checkStrategy(self.custom_env["min_strategy"]))
         toolbox.register("evaluate", self.eval_nn, resdir=resdir)
 
 

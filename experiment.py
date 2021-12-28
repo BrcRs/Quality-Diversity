@@ -222,7 +222,7 @@ class Experiment:
     
     def set_value(self, v_name):
         if v_name not in self.registered_val:
-            raise NameError("Unknown value: " + v_name + "\nPossible options: " + self.registered_val)
+            raise NameError("Unknown value: " + v_name + "\nPossible options: " + str(self.registered_val))
         self.custom_env['quality'] = v_name # Before the key was 'selection'
 
     def get_env_name(self):

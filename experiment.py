@@ -1,5 +1,5 @@
 import cma
-import gym#, gym_fastsim
+import gym, gym_fastsim
 from deap import *
 import numpy as np
 from fixed_structure_nn_numpy import SimpleNeuralControllerNumpy

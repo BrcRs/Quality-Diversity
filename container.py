@@ -43,17 +43,17 @@ class Grid:
     def add_to_grid(self,ind, local_quality, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
         # determining the grid cell coordinates to add to
         x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)	
-        if (x,y) in self.keys():
-            if local_quality < self[(x,y)].fit: # this assumes that the lower the number of collisions, the better
-                self[(x,y)] = ind
+        if (x,y) in self.grid.keys():
+            if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
+                self.grid[(x,y)] = ind
         else:
-            self[(x,y)] = ind
+            self.grid[(x,y)] = ind
 
     def get_pop(self):
         return list(self.grid.values())
 
     def stat_grid(self, resdir, nb_eval, dim=[100, 100]):
-        if(len(self.values())==0):
+        if(len(self.grid.values())==0):
             print("Empty grid: no stats...")
             return
 
@@ -61,11 +61,11 @@ class Grid:
         max_v=None
         for i in range(dim[0]):
             for j in range(dim[1]):
-                if ((i,j) in self.keys()):
+                if ((i,j) in self.grid.keys()):
                     nb_filled+=1
                     
         nbcells=functools.reduce(lambda x, y: x*y, dim)
-        c_values=[ind.fit for ind in list(self.values())]
+        c_values=[ind.fit for ind in list(self.grid.values())]
         max_v=max(c_values)
         total_quality=sum(c_values)
         #print("Number of evaluations: %d"%(nb_eval))

@@ -576,7 +576,8 @@ class Experiment:
             elif self.custom_env['container'] == 'archive':
                 collection = archive.get_pop().copy()
             else:
-                raise ValueError("Unknown container type")
+                raise ValueError("Unknown container type: " + self.custom_env['container'] 
+                + "\nPossible values are 'grid' and 'archive'")
 
             pq = []
             #### From population
@@ -748,7 +749,7 @@ def main():
 
     # Being able to change considered value between fitness, novelty, curiosity, 
     # novelty & local quality
-    exp = Experiment(cont="Archive", sel="random", val="NS")
+    exp = Experiment(cont="archive", sel="random", val="NS")
     exp.set_add_strategy("random")
     pop, logbook, paretofront, grid = exp.run()
 

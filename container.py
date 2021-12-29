@@ -84,28 +84,28 @@ class Grid:
 
 
     def dump_grid(self, resdir, dim=[100, 100]):
-        if(len(self.values())==0):
+        if(len(self.grid.values())==0):
             print("Empty grid: no dump...")
             return
         with open(resdir+"/map.dat","w") as mf:
             for i in range(dim[0]):
                 for j in range(dim[1]):
-                    if ((i,j) in self.keys()):
-                        mf.write("%.2f "%(self[(i,j)].fit))
+                    if ((i,j) in self.grid.keys()):
+                        mf.write("%.2f "%(self.grid[(i,j)].fit))
                     else:
                         mf.write("=== ")
                 mf.write("\n")
         with open(resdir+"/map_collisions.dat","w") as mf:
             for i in range(dim[0]):
                 for j in range(dim[1]):
-                    if ((i,j) in self.keys()):
-                        mf.write("%.2f "%(self[(i,j)].log["collision"]))
+                    if ((i,j) in self.grid.keys()):
+                        mf.write("%.2f "%(self.grid[(i,j)].log["collision"]))
                     else:
                         mf.write("=== ")
                 mf.write("\n")
         with open(resdir+"/map_bd.dat","w") as mf:
-            for p in self.keys():
-                ind=self[p]
+            for p in self.grid.keys():
+                ind=self.grid[p]
                 for i in range(len(ind.bd)):
                     mf.write("%f "%(ind.bd[i]))
                 mf.write("\n")

@@ -242,12 +242,14 @@ class Archive(Container):
                     dpop = [o for o in pop]
                     dpop.sort(key=lambda ind: np.linalg.norm(np.array(i.bd)-np.array(ind.bd)))
                     nearest = dpop[0]
-                    sec_nearest = dpop[1]
+                    sec_nearest = None
+                    if len(dpop) > 1:
+                        sec_nearest = dpop[1]
                     # Distance to nearest distance exceeds predefined threshold l?
                     if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
                         # add it
                         pop.append(i)
-                    elif np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
+                    elif sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
                         if eps_dominate(i, nearest, eps):
                             # we can replace the nearest neighbor if:
                             # the distance to the second nearest exceeds l

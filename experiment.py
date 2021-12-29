@@ -656,7 +656,7 @@ class Experiment:
             #####################
 
             # Update the archive, must be done at the end
-            archive = archive.update_score(pq, offspring,
+            archive = archive.update_score(pq, offspring, archive,
                                 self.custom_env['nov_k'],
                                 self.custom_env['nov_add_strategy'],
                                 self.custom_env['nov_lambda'])

@@ -688,7 +688,7 @@ class Experiment:
         grid.stat_grid(resdir, nb_eval, dim=self.custom_env['dim_grid'])
         grid.dump_grid(resdir, dim=self.custom_env['dim_grid'])
 
-        return population, None, paretofront, grid.grid
+        return population, None, paretofront, grid.grid, archive
 
 
     def run(self):
@@ -708,7 +708,7 @@ class Experiment:
             rf.write("env_name: " + env_name)
             for k in self.custom_env.keys():
                 rf.write(k+": "+str(self.custom_env[k])+"\n")
-        pop, logbook, paretofront, grid = self.launch_ea(env, mu=mu, lambda_=lambda_, ngen=ngen, resdir=resdir)
+        pop, logbook, paretofront, grid, archive = self.launch_ea(env, mu=mu, lambda_=lambda_, ngen=ngen, resdir=resdir)
         cdir="completed_runs"
         
         try:
@@ -727,7 +727,7 @@ class Experiment:
                 no_collision += 1
         print("nb cellule without collisions == ", no_collision)
 
-        return pop, logbook, paretofront, grid
+        return pop, logbook, paretofront, grid, archive
 
 def main():
     args = sys.argv[1:]
@@ -792,7 +792,8 @@ def main():
         print("set", key, "to", word)
 
 
-    pop, logbook, paretofront, grid = exp.run()
+    pop, logbook, paretofront, grid, archive = exp.run()
+    print(archive.size())
 
 if __name__ == "__main__":
     main()

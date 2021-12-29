@@ -113,10 +113,10 @@ class Grid:
 
 class Archive(Container):
     """Archive used to compute novelty scores."""
-    def __init__(self, lbd, fit_lbd, k=15):
+    def __init__(self, lbd, fit_lbd, k=15, _pop=None):
         super.__init__(lbd, fit_lbd, k)
         self.kdtree=KDTree(self.all_bd)
-        self.pop = []
+        self.pop = _pop.copy() if _pop != None else []
         #print("Archive constructor. size = %d"%(len(self.all_bd)))
         
     def update(self,new_bd, fit_bd):
@@ -188,6 +188,7 @@ class Archive(Container):
             return None
 
         lbd=[]
+        pop = []
         # Update of the archive
         # TODO add all the other strategies
         if(add_strategy=="random"):
@@ -198,14 +199,14 @@ class Archive(Container):
                 print("Random archive update. Adding offspring: "+str(l[:_lambda])) 
             lbd=[offspring[l[i]].bd for i in range(_lambda)]
             lbd_fit = [-1*offspring[l[i]].fit for i in range(_lambda)]
-            archive.pop += [offspring[l[i]] for i in range(_lambda)]
+            pop += [offspring[l[i]] for i in range(_lambda)]
         elif(add_strategy=="novel"):
             # the most novel individuals are added
             soff=sorted(offspring,lambda x:x.novelty)
             ilast=len(offspring)-_lambda
             lbd=[soff[i].bd for i in range(ilast,len(soff))]
             lbd_fit=[-1*soff[i].fit for i in range(ilast,len(soff))]
-            archive.pop += [soff[i] for i in range(ilast,len(soff))]
+            pop += [soff[i] for i in range(ilast,len(soff))]
             if (verbose):
                 print("Novel archive update. Adding offspring: ")
                 for offs in soff[ilast:len(soff)]:
@@ -218,7 +219,7 @@ class Archive(Container):
             return None
             
         if(archive==None):
-            archive = Archive(lbd,lbd_fit,k)
+            archive = Archive(lbd,lbd_fit,k, _pop=pop)
         else:
             archive.update(lbd,lbd_fit)
 

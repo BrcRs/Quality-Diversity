@@ -8,27 +8,6 @@ import functools
 import math
 
 
-class Container:
-    def __init__(self, lbd, fit_lbd, k=15):
-        self.all_bd=lbd
-        # self.kdtree=KDTree(self.all_bd)
-        self.k=k
-        self.fit = fit_lbd
-
-    def update(self,new_bd, fit_bd):
-        oldsize=len(self.all_bd)
-        self.all_bd=self.all_bd + new_bd
-        self.fit += fit_bd
-        # self.kdtree=KDTree(self.all_bd)
-        #print("Archive updated, old size = %d, new size = %d"%(oldsize,len(self.all_bd)))    
-
-    def size(self):
-        return len(self.all_bd)
-
-    @abstractstaticmethod
-    def update_score():
-        raise NotImplementedError()
-
 class Grid:
     def __init__(self):
         self.grid = dict()
@@ -110,18 +89,60 @@ class Grid:
                     mf.write("%f "%(ind.bd[i]))
                 mf.write("\n")
 
+class Container:
+    def __init__(self, pop=[], k=15):
+        self.pop = pop.copy()
+        self.all_bd, self.fit = return_bd_fit(pop)
+        # self.all_bd=lbd
+        # self.kdtree=KDTree(self.all_bd)
+        self.k=k
+        # self.fit = fit_lbd
 
+    # TODO before, the bd was added, now, is needs to be reset systematically
+    def update(self, pop):
+        oldsize=len(self.all_bd)
+        self.pop = pop.copy()
+        self.all_bd, self.fit = return_bd_fit(pop)
+        # self.all_bd=self.all_bd + new_bd
+        # self.fit += fit_bd
+        # self.kdtree=KDTree(self.all_bd)
+        #print("Archive updated, old size = %d, new size = %d"%(oldsize,len(self.all_bd)))    
+
+    def size(self):
+        return len(self.all_bd)
+
+    @abstractstaticmethod
+    def update_score():
+        raise NotImplementedError()
+
+
+def eps_dominate(x, y, eps):
+    # x dominates y if these three equations are verified
+        # novelty(x) >= (1-eps) * novelty(y)
+        # quality(x) >= (1-eps) * quality(y)
+        # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
+    cond1 = x.novelty >= (1 - eps) * y.novelty
+    cond2 = x.fit >= (1 - eps) * y.fit
+    cond3 = (x.novelty - y.novelty) * y.fit > -(x.fit - y.fit) * y.novelty
+    return cond1 and cond2 and cond3
+
+def return_bd_fit(pop):
+    lbd=[ind.bd for ind in pop]
+    lbd_fit = [-1*ind.fit for ind in pop]
+
+    return lbd, lbd_fit
 class Archive(Container):
     """Archive used to compute novelty scores."""
-    def __init__(self, lbd, fit_lbd, k=15, _pop=None):
-        super().__init__(lbd, fit_lbd, k=k)
+    def __init__(self, _pop=[], k=15):
+        super().__init__(pop=_pop, k=k)
         self.kdtree=KDTree(self.all_bd)
-        self.pop = _pop.copy() if _pop != None else []
+        # self.pop = _pop.copy()
         #print("Archive constructor. size = %d"%(len(self.all_bd)))
         
-    def update(self,new_bd, fit_bd):
-        super().update(new_bd, fit_bd)
+    def update(self, pop):
+        super().update(pop)
         self.kdtree=KDTree(self.all_bd)
+        # self.pop = pop
         #print("Archive updated, old size = %d, new size = %d"%(oldsize,len(self.all_bd)))
     
     def get_pop(self):
@@ -172,11 +193,11 @@ class Archive(Container):
         else:
             if (verbose):
                 print("Update Novelty. Initial step...") 
-            # TODO add curiosity
+            # TODO add curiosity?
             for ind in population:
                 ind.novelty = 0.
                 ind.lc = 0
-                ind.curiosity = 0.
+                # ind.curiosity = 0.
             
         if (verbose):
             print("Fitness (novelty): ",end="") 
@@ -188,7 +209,7 @@ class Archive(Container):
             return None
 
         lbd=[]
-        pop = []
+        pop = [] if archive == None else archive.pop
         # Update of the archive
         # TODO add all the other strategies
         if(add_strategy=="random"):
@@ -212,15 +233,44 @@ class Archive(Container):
                 for offs in soff[ilast:len(soff)]:
                     print("    nov="+str(offs.novelty)+" fit="+str(offs.fitness.values)+" bd="+str(offs.bd))
         elif add_strategy == "Cully":
-            raise NotImplementedError()
+            for i in offspring:
+                if len(pop) > 0:
+                    dpop=[]
+                    fitpop = []
+                    dpop = [o for o in pop]
+                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(i.bd)-np.array(ind.bd)))
+                    nearest = dpop[0]
+                    sec_nearest = dpop[1]
+                    # Distance to nearest distance exceeds predefined threshold l?
+                    if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
+                        # add it
+                        pop.append(i)
+                    elif np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
+                        if eps_dominate(i, nearest):
+                            # we can replace the nearest neighbor if:
+                            # the distance to the second nearest exceeds l
+                            # and if it improves the quality or the novelty score
+                            # we can use exclusive pareto epsilon-dominance
+                            # x dominates y if these three equations are verified
+                                # novelty(x) >= (1-eps) * novelty(y)
+                                # quality(x) >= (1-eps) * quality(y)
+                                # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
+                            pop.append(i)
+                            pop.remove(nearest)
+
+
+                else:
+                    pop.append(i)
+
+            lbd, lbd_fit = return_bd_fit(pop)
         else:
             the_valid = ["random", "novel", "Cully"]
             print("ERROR: update_score: unknown add strategy(%s), valid alternatives are", the_valid, ""%(add_strategy))
             return None
             
         if(archive==None):
-            archive = Archive(lbd,lbd_fit,k, _pop=pop)
+            archive = Archive( _pop=pop,k=k)
         else:
-            archive.update(lbd,lbd_fit)
+            archive.update(pop)
 
         return archive

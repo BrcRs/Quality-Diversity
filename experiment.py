@@ -767,13 +767,29 @@ def main():
     # lambda_ = self.custom_env['lambda']
     # mu = self.custom_env['mu']
     # exp.set_parameters({'nb_gen' : 1000, 'mu' : 200, 'lambda' : 200})
+
+        # 'min_value': -30, # min genotype value
+        # 'max_value': 30, # max genotype value
+        # 'min_strategy': 0.5, # min value for the mutation
+        # 'max_strategy': 3, # max value for the mutation
+        # 'nb_gen': 200, # number of generations
+        # 'mu': 100, # population size
+        # 'lambda': 200, # number of individuals generated # TODO isn't it supposed to be equal to mu?
+        # 'nov_k': 15, # k parameter of novelty search
+        # 'nov_add_strategy': "random", # archive addition strategy (either 'random' or 'novel' or 'Cully')
+        # 'nov_lambda': 6, # number of individuals added to the archive
+
     for arg in args:
         keywords = arg.split("=")
         key = keywords[0]
         word = keywords[1]
-        if key not in exp.custom_env.keys():
-            warnings.warn("Unkown key: " + key)
-        exp.set_parameters({key : float(word)})
+        if key in ["container", "selection", "quality", 'nov_add_strategy']:
+            exp.set_parameters({key : word})
+        elif key in ['nb_gen', 'mu', 'lambda', 'nov_k', 'nov_lambda']:
+            exp.set_parameters({key : int(word)})
+        else:
+            warnings.warn("Unkown or unimplemented key: " + key)
+        print("set", key, "to", word)
 
 
     pop, logbook, paretofront, grid = exp.run()

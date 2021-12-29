@@ -168,7 +168,7 @@ class Archive(Container):
         return sum(d[:self.k+1])/self.k, kNeighboursInf # as the indiv is in the population, the first value is necessarily a 0.
 
     @staticmethod
-    def update_score(population, offspring, archive, k=15, add_strategy="random", _lambda=6, verbose=False):
+    def update_score(population, offspring, archive, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
         """Update the novelty criterion (including archive update) 
 
         Implementation of novelty search following (Gomes, J., Mariano, P., & Christensen, A. L. (2015, July). Devising effective novelty search algorithms: A comprehensive empirical study. In Proceedings of GECCO 2015 (pp. 943-950). ACM.).
@@ -177,6 +177,8 @@ class Archive(Container):
         :param k: is the number of nearest neighbors taken into account
         :param add_strategy: is either "random" (a random set of indiv is added to the archive) or "novel" (only the most novel individuals are added to the archive).
         :param _lambda: is the number of individuals added to the archive for each generation
+        :param _l: Threshold for the nearest beighbor (Cully)
+        :param eps: Epsilon used un epsilon dominance (Cully)
         The default values correspond to the one giving the better results in the above mentionned paper.
 
         The function returns the new archive
@@ -218,15 +220,15 @@ class Archive(Container):
             random.shuffle(l)
             if (verbose):
                 print("Random archive update. Adding offspring: "+str(l[:_lambda])) 
-            lbd=[offspring[l[i]].bd for i in range(_lambda)]
-            lbd_fit = [-1*offspring[l[i]].fit for i in range(_lambda)]
+            # lbd=[offspring[l[i]].bd for i in range(_lambda)]
+            # lbd_fit = [-1*offspring[l[i]].fit for i in range(_lambda)]
             pop += [offspring[l[i]] for i in range(_lambda)]
         elif(add_strategy=="novel"):
             # the most novel individuals are added
             soff=sorted(offspring,lambda x:x.novelty)
             ilast=len(offspring)-_lambda
-            lbd=[soff[i].bd for i in range(ilast,len(soff))]
-            lbd_fit=[-1*soff[i].fit for i in range(ilast,len(soff))]
+            # lbd=[soff[i].bd for i in range(ilast,len(soff))]
+            # lbd_fit=[-1*soff[i].fit for i in range(ilast,len(soff))]
             pop += [soff[i] for i in range(ilast,len(soff))]
             if (verbose):
                 print("Novel archive update. Adding offspring: ")
@@ -246,7 +248,7 @@ class Archive(Container):
                         # add it
                         pop.append(i)
                     elif np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
-                        if eps_dominate(i, nearest):
+                        if eps_dominate(i, nearest, eps):
                             # we can replace the nearest neighbor if:
                             # the distance to the second nearest exceeds l
                             # and if it improves the quality or the novelty score
@@ -256,13 +258,14 @@ class Archive(Container):
                                 # quality(x) >= (1-eps) * quality(y)
                                 # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
                             pop.append(i)
+                            assert nearest in pop
                             pop.remove(nearest)
 
 
                 else:
                     pop.append(i)
 
-            lbd, lbd_fit = return_bd_fit(pop)
+            # lbd, lbd_fit = return_bd_fit(pop)
         else:
             the_valid = ["random", "novel", "Cully"]
             print("ERROR: update_score: unknown add strategy(%s), valid alternatives are", the_valid, ""%(add_strategy))

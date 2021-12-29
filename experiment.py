@@ -30,6 +30,8 @@ from scoop import futures
 from container import Archive, Grid
 import os
 
+import sys
+
 # import grid_management
 
 # import ea_dps
@@ -728,6 +730,7 @@ class Experiment:
         return pop, logbook, paretofront, grid
 
 def main():
+    args = sys.argv[1:]
 
     ### In Cully2017,
     # nb ite = 50 000
@@ -763,8 +766,15 @@ def main():
     # ngen = self.custom_env['nb_gen']
     # lambda_ = self.custom_env['lambda']
     # mu = self.custom_env['mu']
+    # exp.set_parameters({'nb_gen' : 1000, 'mu' : 200, 'lambda' : 200})
+    for arg in args:
+        keywords = arg.split("=")
+        key = keywords[0]
+        word = keywords[1]
+        if key not in exp.custom_env.keys():
+            warnings.warn("Unkown key: " + key)
+        exp.set_parameters({key : float(word)})
 
-    exp.set_parameters({'nb_gen' : 1000, 'mu' : 200, 'lambda' : 200})
 
     pop, logbook, paretofront, grid = exp.run()
 

@@ -114,13 +114,13 @@ class Grid:
 class Archive(Container):
     """Archive used to compute novelty scores."""
     def __init__(self, lbd, fit_lbd, k=15, _pop=None):
-        super.__init__(lbd, fit_lbd, k)
+        super().__init__(lbd, fit_lbd, k=k)
         self.kdtree=KDTree(self.all_bd)
         self.pop = _pop.copy() if _pop != None else []
         #print("Archive constructor. size = %d"%(len(self.all_bd)))
         
     def update(self,new_bd, fit_bd):
-        super.update(new_bd, fit_bd)
+        super().update(new_bd, fit_bd)
         self.kdtree=KDTree(self.all_bd)
         #print("Archive updated, old size = %d, new size = %d"%(oldsize,len(self.all_bd)))
     

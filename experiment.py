@@ -5,6 +5,8 @@ import numpy as np
 from fixed_structure_nn_numpy import SimpleNeuralControllerNumpy
 from scipy.spatial import KDTree
 
+import warnings
+
 import datetime
 
 from deap import algorithms
@@ -251,6 +253,10 @@ class Experiment:
         if v_name not in self.registered_val:
             raise NameError("Unknown value: " + v_name + "\nPossible options: " + str(self.registered_val))
         self.custom_env['quality'] = v_name # Before the key was 'selection'
+
+    def set_parameters(self, params):
+        warnings.warn('Validity of parameters is unchecked')
+        self.custom_env.update(params)
 
     def get_env_name(self):
         return self.custom_env['container'] + "_" + self.custom_env['selection'] + "_" + self.custom_env['quality']
@@ -691,9 +697,11 @@ class Experiment:
         env_name = self.get_env_name()
         resdir = "res_" + env_name + "_" + datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
         os.mkdir(resdir)
+
         ngen = self.custom_env['nb_gen']
         lambda_ = self.custom_env['lambda']
         mu = self.custom_env['mu']
+
         with open(resdir+"/run_params.log", "w") as rf:
             rf.write("env_name: " + env_name)
             for k in self.custom_env.keys():
@@ -751,6 +759,13 @@ def main():
     # novelty & local quality
     exp = Experiment(cont="archive", sel="random", val="NS")
     exp.set_add_strategy("random")
+
+    # ngen = self.custom_env['nb_gen']
+    # lambda_ = self.custom_env['lambda']
+    # mu = self.custom_env['mu']
+
+    exp.set_parameters({'nb_gen' : 1000, 'mu' : 200, 'lambda' : 200})
+
     pop, logbook, paretofront, grid = exp.run()
 
 if __name__ == "__main__":

@@ -146,7 +146,7 @@ class Archive(Container):
             print("WARNING in novelty search: the smallest distance should be 0 (distance to itself). If you see it, you probably try to get the novelty with respect to a population your indiv is not in. The novelty value is then the sum of the distance to the k+1 nearest divided by k.")
         return sum(d[:self.k+1])/self.k, kNeighboursInf # as the indiv is in the population, the first value is necessarily a 0.
 
-    
+    @staticmethod
     def update_score(population, offspring, archive, k=15, add_strategy="random", _lambda=6, verbose=False):
         """Update the novelty criterion (including archive update) 
 

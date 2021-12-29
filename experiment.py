@@ -446,10 +446,10 @@ class Experiment:
 
         # TODO adapt
 
-        archive = Archive.update_score(population,population,None,
-                            self.custom_env['nov_k'],
-                            self.custom_env['nov_add_strategy'],
-                            self.custom_env['nov_lambda'])
+        archive = Archive.update_score(population, population, None,
+                            k=self.custom_env['nov_k'],
+                            add_strategy=self.custom_env['nov_add_strategy'],
+                            _lambda=self.custom_env['nov_lambda'])
 
         for ind in population:
             if (self.custom_env['quality']=="FIT+NS"):
@@ -656,10 +656,10 @@ class Experiment:
             #####################
 
             # Update the archive, must be done at the end
-            archive = archive.update_score(pq, offspring, archive,
-                                self.custom_env['nov_k'],
-                                self.custom_env['nov_add_strategy'],
-                                self.custom_env['nov_lambda'])
+            archive = Archive.update_score(pq, offspring, archive,
+                                k=self.custom_env['nov_k'],
+                                add_strategy=self.custom_env['nov_add_strategy'],
+                                _lambda=self.custom_env['nov_lambda'])
 
             # Update the hall of fame with the generated individuals
             if paretofront is not None:

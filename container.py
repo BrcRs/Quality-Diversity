@@ -8,6 +8,12 @@ import functools
 import math
 
 
+def hash_ind(ind):
+    genotype = [_ for _ in ind]
+    string = str(genotype)
+    string = hash(string)
+    return string
+
 class Grid:
     def __init__(self):
         self.grid = dict()
@@ -55,17 +61,17 @@ class Grid:
             if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
                 self.grid[(x,y)] = ind
                 # update curio
-                if ind in parents.keys():
-                    parents[ind].curiosity += 1
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)].curiosity += 1
             else:
                 # update curio
-                if ind in parents.keys():
-                    parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5)
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)].curiosity = max(0, parents[hash_ind(ind)].curiosity - 0.5)
         else:
             self.grid[(x,y)] = ind
             # update curio
-            if ind in parents.keys():
-                parents[ind].curiosity += 1
+            if hash_ind(ind) in parents.keys():
+                parents[hash_ind(ind)].curiosity += 1
 
     def get_pop(self):
         return list(self.grid.values())
@@ -269,11 +275,11 @@ class Archive(Container):
 
             # TODO Curiosity update
             for ind in to_add:
-                if ind in parents.keys():
-                    parents[ind] += 1
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)] += 1
             for ind in to_reject:
-                if ind in parents.keys():
-                    parents[ind] = max(0, parents[ind] - 0.5) # TODO I suppose inf bound is 0?
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)] = max(0, parents[hash_ind(ind)] - 0.5) # TODO I suppose inf bound is 0?
 
             pop += to_add
         elif(add_strategy=="novel"):
@@ -286,11 +292,11 @@ class Archive(Container):
             to_reject = soff[:ilast]
             # TODO Curiosity update
             for ind in to_add:
-                if ind in parents.keys():
-                    parents[ind].curiosity += 1
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)].curiosity += 1
             for ind in to_reject:
-                if ind in parents.keys():
-                    parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5) # TODO I suppose inf bound is 0?
+                if hash_ind(ind) in parents.keys():
+                    parents[hash_ind(ind)].curiosity = max(0, parents[hash_ind(ind)].curiosity - 0.5) # TODO I suppose inf bound is 0?
 
             pop += to_add
             if (verbose):
@@ -313,8 +319,8 @@ class Archive(Container):
                         # add it
                         pop.append(i)
                         # update curiosity
-                        if ind in parents.keys():
-                            parents[i].curiosity += 1
+                        if hash_ind(i) in parents.keys():
+                            parents[hash_ind(i)].curiosity += 1
                     elif (sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(i, nearest, eps):
                         # we can replace the nearest neighbor if:
                         # the distance to the second nearest exceeds l
@@ -326,23 +332,23 @@ class Archive(Container):
                             # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
                         pop.append(i)
                         # update curiosity
-                        if ind in parents.keys():
-                            parents[i].curiosity += 1
+                        if hash_ind(i) in parents.keys():
+                            parents[hash_ind(i)].curiosity += 1
                         
                         assert nearest in pop
                         pop.remove(nearest)
                     else:
                         # Rejected
                         # update curiosity
-                        if ind in parents.keys():
-                            parents[i].curiosity = max(0, parents[i].curiosity - 0.5)
+                        if hash_ind(i) in parents.keys():
+                            parents[hash_ind(i)].curiosity = max(0, parents[hash_ind(i)].curiosity - 0.5)
 
 
                 else:
                     pop.append(i)
                     # update curiosity
-                    if ind in parents.keys():
-                        parents[i].curiosity += 1
+                    if hash_ind(i) in parents.keys():
+                        parents[hash_ind(i)].curiosity += 1
 
             # lbd, lbd_fit = return_bd_fit(pop)
         else:

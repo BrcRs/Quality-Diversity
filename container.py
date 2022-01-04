@@ -24,7 +24,7 @@ class Grid:
         return not (a or b or c or d)
 
     def get_nov(self, ind, k=1, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
-        # TODO the novelty is $1 - number of filled cells around/nb neighbors$ 
+        # DONE the novelty is $1 - number of filled cells around/nb neighbors$ 
         x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
         cpt = 0
         # Moore neighboring
@@ -41,10 +41,11 @@ class Grid:
         y = dim[1]*y//(max_v[1] - min_v[1])
         return (x,y)
 
-    def add_to_grid(self, ind, local_quality, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
+    def add_to_grid(self, ind, local_quality, parents, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
         """
         :param k: Subgrid size
         """
+        # DONE upd curiosity
         # update novelty
         ind.novelty = self.get_nov(ind, k=k, dim=dim, min_v=min_v, max_v=max_v)
         # determining the grid cell coordinates to add to
@@ -53,8 +54,18 @@ class Grid:
             # Local competition?
             if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
                 self.grid[(x,y)] = ind
+                # update curio
+                if ind in parents.keys():
+                    parents[ind].curiosity += 1
+            else:
+                # update curio
+                if ind in parents.keys():
+                    parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5)
         else:
             self.grid[(x,y)] = ind
+            # update curio
+            if ind in parents.keys():
+                parents[ind].curiosity += 1
 
     def get_pop(self):
         return list(self.grid.values())
@@ -258,9 +269,11 @@ class Archive(Container):
 
             # TODO Curiosity update
             for ind in to_add:
-                parents[ind] += 1
+                if ind in parents.keys():
+                    parents[ind] += 1
             for ind in to_reject:
-                parents[ind] = max(0, parents[ind] - 0.5) # TODO I suppose inf bound is 0?
+                if ind in parents.keys():
+                    parents[ind] = max(0, parents[ind] - 0.5) # TODO I suppose inf bound is 0?
 
             pop += to_add
         elif(add_strategy=="novel"):
@@ -273,9 +286,11 @@ class Archive(Container):
             to_reject = soff[:ilast]
             # TODO Curiosity update
             for ind in to_add:
-                parents[ind].curiosity += 1
+                if ind in parents.keys():
+                    parents[ind].curiosity += 1
             for ind in to_reject:
-                parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5) # TODO I suppose inf bound is 0?
+                if ind in parents.keys():
+                    parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5) # TODO I suppose inf bound is 0?
 
             pop += to_add
             if (verbose):
@@ -298,7 +313,8 @@ class Archive(Container):
                         # add it
                         pop.append(i)
                         # update curiosity
-                        parents[i].curiosity += 1
+                        if ind in parents.keys():
+                            parents[i].curiosity += 1
                     elif (sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(i, nearest, eps):
                         # we can replace the nearest neighbor if:
                         # the distance to the second nearest exceeds l
@@ -310,20 +326,23 @@ class Archive(Container):
                             # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
                         pop.append(i)
                         # update curiosity
-                        parents[i].curiosity += 1
+                        if ind in parents.keys():
+                            parents[i].curiosity += 1
+                        
                         assert nearest in pop
                         pop.remove(nearest)
                     else:
                         # Rejected
                         # update curiosity
-                        parents[i].curiosity = max(0, parents[i].curiosity - 0.5)
-
+                        if ind in parents.keys():
+                            parents[i].curiosity = max(0, parents[i].curiosity - 0.5)
 
 
                 else:
                     pop.append(i)
                     # update curiosity
-                    parents[i].curiosity += 1
+                    if ind in parents.keys():
+                        parents[i].curiosity += 1
 
             # lbd, lbd_fit = return_bd_fit(pop)
         else:

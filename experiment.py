@@ -15,6 +15,8 @@ from deap import benchmarks
 from deap import creator
 from deap import tools
 
+import algorithms as algo
+
 import array
 import random
 import operator
@@ -388,6 +390,7 @@ class Experiment:
         toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
 
         # TODO is this where we change selection operator?
+        # TODO this is kind of useless to leave this as we change it later
         toolbox.register("select", tools.selNSGA2)
         
         toolbox.register("map",futures.map)
@@ -410,6 +413,10 @@ class Experiment:
         ##
         # grid container
         grid = Grid()
+
+        # parents : dict, maintains who generated who during selection
+        parents = dict()
+
         # Evaluate the individuals with an invalid (i.e. not yet evaluated) fitness
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
         fitnesses_bds = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -511,11 +518,12 @@ class Experiment:
             # => offspring = pop because pop is already generated at random
             if self.custom_env['selection'] == 'noselection':
                 offspring = population.copy()
+                parents = dict() # no ancestors because generated at random
             ## Case collection + random sel
             # => offspring = polynomial variation of the filtered collection, aka container
             elif self.custom_env['selection'] in ["random", "pareto", "score", "pop", "pop&arch"]:
                 # by default, cxpb = 0., no crossover
-                offspring = algorithms.varOr(select_pop, toolbox, lambda_, cxpb, mutpb)
+                offspring = algo.varOr(select_pop, toolbox, parents, lambda_, cxpb, mutpb)
             ## Case collection + score
             # Selection with roulette or tournament, or score-proportionate of collection
 

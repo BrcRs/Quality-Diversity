@@ -363,7 +363,7 @@ class Experiment:
         else:
             print("Variante inconnue: " + self.custom_env['quality'])
 
-        creator.create("Individual", array.array, typecode="d", fitness=creator.MyFitness, strategy=None, curiosity=None)
+        creator.create("Individual", array.array, typecode="d", fitness=creator.MyFitness, strategy=None, curiosity=0.)
         creator.create("Strategy", array.array, typecode="d")
 
         nn=SimpleNeuralControllerNumpy(self.custom_env["nb_input"],

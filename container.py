@@ -49,46 +49,12 @@ class Grid:
         ind.novelty = self.get_nov(ind, k=k, dim=dim, min_v=min_v, max_v=max_v)
         # determining the grid cell coordinates to add to
         x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
-        if add_strategy != "Cully":
-            if (x,y) in self.grid.keys():
-                # Local competition?
-                if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
-                    self.grid[(x,y)] = ind
-            else:
+        if (x,y) in self.grid.keys():
+            # Local competition?
+            if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
                 self.grid[(x,y)] = ind
         else:
-            for i in offspring:
-                if len(pop) > 0:
-                    dpop=[]
-                    fitpop = []
-                    dpop = [o for o in pop]
-                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(i.bd)-np.array(ind.bd)))
-                    nearest = dpop[0]
-                    sec_nearest = None
-                    if len(dpop) > 1:
-                        sec_nearest = dpop[1]
-                    # Distance to nearest distance exceeds predefined threshold l?
-                    if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
-                        # add it
-                        pop.append(i)
-                    elif sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
-                        if eps_dominate(i, nearest, eps):
-                            # we can replace the nearest neighbor if:
-                            # the distance to the second nearest exceeds l
-                            # and if it improves the quality or the novelty score
-                            # we can use exclusive pareto epsilon-dominance
-                            # x dominates y if these three equations are verified
-                                # novelty(x) >= (1-eps) * novelty(y)
-                                # quality(x) >= (1-eps) * quality(y)
-                                # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
-                            pop.append(i)
-                            assert nearest in pop
-                            pop.remove(nearest)
-
-
-                else:
-                    pop.append(i)
-
+            self.grid[(x,y)] = ind
 
     def get_pop(self):
         return list(self.grid.values())
@@ -229,8 +195,11 @@ class Archive(Container):
             print("WARNING in novelty search: the smallest distance should be 0 (distance to itself). If you see it, you probably try to get the novelty with respect to a population your indiv is not in. The novelty value is then the sum of the distance to the k+1 nearest divided by k.")
         return sum(d[:self.k+1])/self.k, kNeighboursInf # as the indiv is in the population, the first value is necessarily a 0.
 
+    def get_curio(self):
+        raise NotImplementedError()
+
     @staticmethod
-    def update_score(population, offspring, archive, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
+    def update_score(population, offspring, archive, parents, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
         """Update the novelty criterion (including archive update) 
 
         Implementation of novelty search following (Gomes, J., Mariano, P., & Christensen, A. L. (2015, July). Devising effective novelty search algorithms: A comprehensive empirical study. In Proceedings of GECCO 2015 (pp. 943-950). ACM.).
@@ -250,10 +219,10 @@ class Archive(Container):
         if (archive) and (archive.size()>=k):
             if (verbose):
                 print("Update Novelty. Archive size=%d"%(archive.size())) 
-            # TODO add curiosity
             for ind in population:
                 ind.novelty , ind.lc=archive.get_nov(ind.bd,ind.fit, population)
                 #print("Novelty: "+str(ind.novelty))
+
         else:
             if (verbose):
                 print("Update Novelty. Initial step...") 
@@ -261,7 +230,7 @@ class Archive(Container):
             for ind in population:
                 ind.novelty = 0.
                 ind.lc = 0
-                # ind.curiosity = 0.
+                # ind.curiosity = 0. # Noooo
             
         if (verbose):
             print("Fitness (novelty): ",end="") 
@@ -284,14 +253,31 @@ class Archive(Container):
                 print("Random archive update. Adding offspring: "+str(l[:_lambda])) 
             # lbd=[offspring[l[i]].bd for i in range(_lambda)]
             # lbd_fit = [-1*offspring[l[i]].fit for i in range(_lambda)]
-            pop += [offspring[l[i]] for i in range(_lambda)]
+            to_add = [offspring[l[i]] for i in range(_lambda)]
+            to_reject = [offspring[l[i]] for i in range(_lambda, len(l))]
+
+            # TODO Curiosity update
+            for ind in to_add:
+                parents[ind] += 1
+            for ind in to_reject:
+                parents[ind] = max(0, parents[ind] - 0.5) # TODO I suppose inf bound is 0?
+
+            pop += to_add
         elif(add_strategy=="novel"):
             # the most novel individuals are added
             soff=sorted(offspring,lambda x:x.novelty)
             ilast=len(offspring)-_lambda
             # lbd=[soff[i].bd for i in range(ilast,len(soff))]
             # lbd_fit=[-1*soff[i].fit for i in range(ilast,len(soff))]
-            pop += [soff[i] for i in range(ilast,len(soff))]
+            to_add = soff[ilast:]
+            to_reject = soff[:ilast]
+            # TODO Curiosity update
+            for ind in to_add:
+                parents[ind].curiosity += 1
+            for ind in to_reject:
+                parents[ind].curiosity = max(0, parents[ind].curiosity - 0.5) # TODO I suppose inf bound is 0?
+
+            pop += to_add
             if (verbose):
                 print("Novel archive update. Adding offspring: ")
                 for offs in soff[ilast:len(soff)]:
@@ -311,23 +297,33 @@ class Archive(Container):
                     if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
                         # add it
                         pop.append(i)
-                    elif sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
-                        if eps_dominate(i, nearest, eps):
-                            # we can replace the nearest neighbor if:
-                            # the distance to the second nearest exceeds l
-                            # and if it improves the quality or the novelty score
-                            # we can use exclusive pareto epsilon-dominance
-                            # x dominates y if these three equations are verified
-                                # novelty(x) >= (1-eps) * novelty(y)
-                                # quality(x) >= (1-eps) * quality(y)
-                                # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
-                            pop.append(i)
-                            assert nearest in pop
-                            pop.remove(nearest)
+                        # update curiosity
+                        parents[i].curiosity += 1
+                    elif (sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(i, nearest, eps):
+                        # we can replace the nearest neighbor if:
+                        # the distance to the second nearest exceeds l
+                        # and if it improves the quality or the novelty score
+                        # we can use exclusive pareto epsilon-dominance
+                        # x dominates y if these three equations are verified
+                            # novelty(x) >= (1-eps) * novelty(y)
+                            # quality(x) >= (1-eps) * quality(y)
+                            # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
+                        pop.append(i)
+                        # update curiosity
+                        parents[i].curiosity += 1
+                        assert nearest in pop
+                        pop.remove(nearest)
+                    else:
+                        # Rejected
+                        # update curiosity
+                        parents[i].curiosity = max(0, parents[i].curiosity - 0.5)
+
 
 
                 else:
                     pop.append(i)
+                    # update curiosity
+                    parents[i].curiosity += 1
 
             # lbd, lbd_fit = return_bd_fit(pop)
         else:

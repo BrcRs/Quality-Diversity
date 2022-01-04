@@ -615,6 +615,8 @@ class Experiment:
                     ind.fitness.values=(ind.novelty,)
                 elif (self.custom_env['quality']=="NSLC"):
                     ind.fitness.values=(ind.novelty,ind.lc)
+                elif (self.custom_env['quality']=="curiosity"):
+                    ind.fitness.values=(ind.curiosity,)
 
                 #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
 
@@ -666,6 +668,8 @@ class Experiment:
             ### old ways ########
             # population[:] = toolbox.select(pq, mu) 
             #####################
+
+            # Already done earlier Update novelty for grid?
 
             # Update the archive, must be done at the end
             if self.custom_env['container'] == 'archive':

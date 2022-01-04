@@ -47,7 +47,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
             ancestor = ind1
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
-            assert ancestor != ind
+            assert ancestor != ind1
             offspring.append(ind1)
             parents[ind1] = ancestor
         elif op_choice < cxpb + mutpb:  # Apply mutation

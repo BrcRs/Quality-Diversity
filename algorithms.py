@@ -49,7 +49,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
 
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
-            assert hash_ind(ancestor) != hash_ind(ind1)
+            assert ancestor != ind1
             offspring.append(ind1)
             parents[hash_ind(ind1)] = ancestor
         elif op_choice < cxpb + mutpb:  # Apply mutation
@@ -58,7 +58,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
             ancestor = toolbox.clone(ind)
 
             ind, = toolbox.mutate(ind)
-            assert hash_ind(ancestor) != hash_ind(ind) # Doesn't pass... is it even a problem? definitely
+            assert ancestor != ind # Doesn't pass... is it even a problem? definitely
 
             del ind.fitness.values
             offspring.append(ind)

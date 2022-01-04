@@ -11,22 +11,84 @@ import math
 class Grid:
     def __init__(self):
         self.grid = dict()
-    
+    # TODO computer novelty score here
+    @staticmethod
+    def valid_coord(point, dim, min_v, max_v):
+        # TODO is this func necessary?
+        x, y = point
+        a = x < dim[0]*min_v[0]//(max_v[0] - min_v[0])
+        b = x >= dim[0]*max_v[0]//(max_v[0] - min_v[0])
+        c = y < dim[1]*min_v[1]//(max_v[1] - min_v[1])
+        d = y >= dim[1]*max_v[1]//(max_v[1] - min_v[1])
+
+        return not (a or b or c or d)
+
+    def get_nov(self, ind, k=1, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
+        # TODO the novelty is $1 - number of filled cells around/nb neighbors$ 
+        x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
+        cpt = 0
+        # Moore neighboring
+        cells = [(x + i, y + j) for i in range(-k, k+1) for j in range(-k, k+1) if (i != 0 or i != j) and Grid.valid_coord((x, y), dim, min_v, max_v)] 
+        for c in cells:
+            if c in self.grid.keys():
+                cpt += 1
+        return (1 - cpt) / len(cells)
+
     @staticmethod
     def get_grid_coord(bd, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
         x,y = bd
-        x = dim[0]*x//(max_v[0] - min_v[0])
+        x = dim[0]*x//(max_v[0] - min_v[0]) # 100 * x // (600 - 0) = 100 * x // 600
         y = dim[1]*y//(max_v[1] - min_v[1])
         return (x,y)
 
-    def add_to_grid(self,ind, local_quality, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
+    def add_to_grid(self, ind, local_quality, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
+        """
+        :param k: Subgrid size
+        """
+        # update novelty
+        ind.novelty = self.get_nov(ind, k=k, dim=dim, min_v=min_v, max_v=max_v)
         # determining the grid cell coordinates to add to
-        x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)	
-        if (x,y) in self.grid.keys():
-            if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
+        x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
+        if add_strategy != "Cully":
+            if (x,y) in self.grid.keys():
+                # Local competition?
+                if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
+                    self.grid[(x,y)] = ind
+            else:
                 self.grid[(x,y)] = ind
         else:
-            self.grid[(x,y)] = ind
+            for i in offspring:
+                if len(pop) > 0:
+                    dpop=[]
+                    fitpop = []
+                    dpop = [o for o in pop]
+                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(i.bd)-np.array(ind.bd)))
+                    nearest = dpop[0]
+                    sec_nearest = None
+                    if len(dpop) > 1:
+                        sec_nearest = dpop[1]
+                    # Distance to nearest distance exceeds predefined threshold l?
+                    if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
+                        # add it
+                        pop.append(i)
+                    elif sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l:
+                        if eps_dominate(i, nearest, eps):
+                            # we can replace the nearest neighbor if:
+                            # the distance to the second nearest exceeds l
+                            # and if it improves the quality or the novelty score
+                            # we can use exclusive pareto epsilon-dominance
+                            # x dominates y if these three equations are verified
+                                # novelty(x) >= (1-eps) * novelty(y)
+                                # quality(x) >= (1-eps) * quality(y)
+                                # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
+                            pop.append(i)
+                            assert nearest in pop
+                            pop.remove(nearest)
+
+
+                else:
+                    pop.append(i)
+
 
     def get_pop(self):
         return list(self.grid.values())
@@ -98,7 +160,7 @@ class Container:
         self.k=k
         # self.fit = fit_lbd
 
-    # TODO before, the bd was added, now, is needs to be reset systematically
+    # DONE before, the bd was added, now, it needs to be reset systematically from pop
     def update(self, pop):
         oldsize=len(self.all_bd)
         self.pop = pop.copy()

@@ -443,7 +443,8 @@ class Experiment:
             ffit.write(str(fit)+"\n")
             ffit.flush()
             # The addition to the grid is based on fitness here
-            # TODO do we have to adapt it?
+            # TODO Make the grid work like the archive
+            # TODO do only if container = grid
             grid.add_to_grid(ind, fit, 
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
@@ -453,7 +454,7 @@ class Experiment:
             paretofront.update(population)
 
         # TODO adapt
-
+        # TODO do only if container = archive
         archive = Archive.update_score(population, population, None,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],

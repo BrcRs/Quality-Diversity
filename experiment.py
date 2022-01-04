@@ -443,9 +443,10 @@ class Experiment:
             ffit.write(str(fit)+"\n")
             ffit.flush()
             # The addition to the grid is based on fitness here
-            # TODO Make the grid work like the archive
-            # TODO do only if container = grid
-            grid.add_to_grid(ind, fit, 
+            # TODO Make the grid work like the archive, maybe?
+            # DONE do only if container = grid
+            if self.custom_env['container'] == 'grid':
+                grid.add_to_grid(ind, fit, 
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
@@ -454,8 +455,9 @@ class Experiment:
             paretofront.update(population)
 
         # TODO adapt
-        # TODO do only if container = archive
-        archive = Archive.update_score(population, population, None,
+        # DONE do only if container = archive
+        if self.custom_env['container'] == 'archive':
+            archive = Archive.update_score(population, population, None,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
                             _lambda=self.custom_env['nov_lambda'])
@@ -482,7 +484,7 @@ class Experiment:
         ### Initial random generation: end
         ##
         # Selected individuals for variation
-        select_pop = population.copy() # TODO Warning! Deep copy necessary? YES
+        select_pop = population.copy() # TODO Warning! (Deep) copy necessary? YES copy atleast
 
         # Begin the generational process
         for gen in range(1, ngen + 1):
@@ -561,7 +563,8 @@ class Experiment:
                 ffit.write(str(fit)+"\n")
                 ffit.flush()
                 # DONE change that to generalize to all container types
-                grid.add_to_grid(ind, ind.fit, 
+                if self.custom_env['container'] == 'grid':
+                    grid.add_to_grid(ind, ind.fit, 
                                             dim=self.custom_env['dim_grid'], 
                                             min_v=self.custom_env['grid_min_v'], 
                                             max_v=self.custom_env['grid_max_v'])
@@ -665,7 +668,8 @@ class Experiment:
             #####################
 
             # Update the archive, must be done at the end
-            archive = Archive.update_score(pq, offspring, archive,
+            if self.custom_env['container'] == 'archive':
+                archive = Archive.update_score(pq, offspring, archive,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
@@ -685,9 +689,9 @@ class Experiment:
         finfo.close()
         ffit.close()
 
-        
-        grid.stat_grid(resdir, nb_eval, dim=self.custom_env['dim_grid'])
-        grid.dump_grid(resdir, dim=self.custom_env['dim_grid'])
+        if self.custom_env['container'] == "grid":
+            grid.stat_grid(resdir, nb_eval, dim=self.custom_env['dim_grid'])
+            grid.dump_grid(resdir, dim=self.custom_env['dim_grid'])
 
         return population, None, paretofront, grid.grid, archive
 

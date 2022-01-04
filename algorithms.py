@@ -43,18 +43,16 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
     for _ in range(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
-            ancestor = ind1
-            ind1, ind2 = toolbox.mate(ind1, ind2)
+            ancestor, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
+            ind1, ind2 = toolbox.mate(ancestor, ind2)
             del ind1.fitness.values
             assert ancestor != ind1
             offspring.append(ind1)
             parents[ind1] = ancestor
         elif op_choice < cxpb + mutpb:  # Apply mutation
-            ind = toolbox.clone(random.choice(population))
-            ancestor = ind
-            ind, = toolbox.mutate(ind)
-            assert ancestor != ind
+            ancestor = toolbox.clone(random.choice(population))
+            ind, = toolbox.mutate(ancestor)
+            assert ancestor != ind # Doesn't pass...
 
             del ind.fitness.values
             offspring.append(ind)

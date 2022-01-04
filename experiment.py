@@ -464,7 +464,7 @@ class Experiment:
         # TODO adapt
         # DONE do only if container = archive
         if self.custom_env['container'] == 'archive':
-            archive = Archive.update_score(population, population, None,
+            archive = Archive.update_score(population, population, None, parents=parents,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
                             _lambda=self.custom_env['nov_lambda'])
@@ -681,7 +681,7 @@ class Experiment:
 
             # Update the archive, must be done at the end
             if self.custom_env['container'] == 'archive':
-                archive = Archive.update_score(pq, offspring, archive,
+                archive = Archive.update_score(pq, offspring, archive, parents=parents,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])

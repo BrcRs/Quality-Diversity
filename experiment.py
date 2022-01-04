@@ -1,5 +1,5 @@
 import cma
-import gym, gym_fastsim
+import gym, gym_fastsim # don't remove gym_fastsim, necessary
 from deap import *
 import numpy as np
 from fixed_structure_nn_numpy import SimpleNeuralControllerNumpy
@@ -453,7 +453,7 @@ class Experiment:
             # TODO Make the grid work like the archive, maybe?
             # DONE do only if container = grid
             if self.custom_env['container'] == 'grid':
-                grid.add_to_grid(ind, fit, 
+                grid.add_to_grid(ind, fit, parents, 
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
@@ -572,7 +572,7 @@ class Experiment:
                 ffit.flush()
                 # DONE change that to generalize to all container types
                 if self.custom_env['container'] == 'grid':
-                    grid.add_to_grid(ind, ind.fit, 
+                    grid.add_to_grid(ind, ind.fit, parents, 
                                             dim=self.custom_env['dim_grid'], 
                                             min_v=self.custom_env['grid_min_v'], 
                                             max_v=self.custom_env['grid_max_v'])

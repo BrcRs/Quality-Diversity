@@ -55,7 +55,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
 
-            ancestor = toolbox.clone(ind1)
+            ancestor = toolbox.clone(ind)
 
             ind, = toolbox.mutate(ind)
             assert hash_ind(ancestor) != hash_ind(ind) # Doesn't pass... is it even a problem? definitely

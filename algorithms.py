@@ -1,5 +1,5 @@
 import random
-
+from container import hash_ind
 # Taken from deap library
 def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
@@ -46,17 +46,17 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
             ancestor, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
             ind1, ind2 = toolbox.mate(ancestor, ind2)
             del ind1.fitness.values
-            assert ancestor != ind1
+            assert hash_ind(ancestor) != hash_ind(ind1)
             offspring.append(ind1)
-            parents[ind1] = ancestor
+            parents[hash_ind(ind1)] = ancestor
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ancestor = toolbox.clone(random.choice(population))
             ind, = toolbox.mutate(ancestor)
-            assert ancestor != ind # Doesn't pass...
+            assert hash_ind(ancestor) != hash_ind(ind) # Doesn't pass... is it even a problem?
 
             del ind.fitness.values
             offspring.append(ind)
-            parents[ind] = ancestor
+            parents[hash_ind(ind)] = ancestor
         else:                           # Apply reproduction
             offspring.append(random.choice(population))
 

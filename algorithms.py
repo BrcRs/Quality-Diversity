@@ -1,3 +1,5 @@
+import random
+
 # Taken from deap library
 def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part

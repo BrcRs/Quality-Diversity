@@ -359,7 +359,7 @@ class Experiment:
         elif (self.custom_env['quality']=="NSLC"):
             creator.create("MyFitness", base.Fitness, weights=(1.0,1.0))
         
-        elif (self.cutom_env['quality'] == "curiosity"):
+        elif (self.custom_env['quality'] == "curiosity"):
             creator.create("MyFitness", base.Fitness, weights=(1.0,))
 
         else:

@@ -1,13 +1,14 @@
 import random
 from container import hash_ind
 
-# def clone_ind(ind, icls, scls, size, imin, imax, smin, smax):
-#     indcopy = icls(i for i in ind) # Individual
-#     indcopy.strategy = scls(i for i in ind.strategy) # Strategy
-#     return indcopy
+def clone_ind(ind, icls, scls):
+    indcopy = icls(i for i in ind) # Individual
+    indcopy.strategy = scls(i for i in ind.strategy) # Strategy
+    assert ind != indcopy
+    return indcopy
 
 # Taken from deap library
-def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
+def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover, mutation **or** reproduction). The modified individuals have
     their fitness invalidated. The individuals are cloned so returned
@@ -51,8 +52,10 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
 
-            ancestor = toolbox.clone(ind1.copy())
-
+            # ancestor = toolbox.clone(ind1) # BUG toolbox.clone doesn't make a new instance? Why?
+            ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
+            print("original:", ind1)
+            print("clone:", ancestor)
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             assert ancestor != ind1
@@ -61,7 +64,10 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb):
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
 
-            ancestor = toolbox.clone(ind.copy())
+            # ancestor = toolbox.clone(ind)
+            ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
+            print("original:", ind1)
+            print("clone:", ancestor)
 
             ind, = toolbox.mutate(ind)
             assert ancestor != ind # Doesn't pass... is it even a problem? definitely

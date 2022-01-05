@@ -44,6 +44,8 @@ def generateES(icls, scls, size, imin, imax, smin, smax):
     ind.strategy = scls(random.uniform(smin, smax) for _ in range(size)) # Strategy
     return ind
 
+
+
 def checkStrategy(minstrategy):
     def decorator(func):
         def wrappper(*args, **kargs):
@@ -523,7 +525,7 @@ class Experiment:
             # => offspring = polynomial variation of the filtered collection, aka container
             elif self.custom_env['selection'] in ["random", "pareto", "score", "pop", "pop&arch"]:
                 # by default, cxpb = 0., no crossover
-                offspring = algo.varOr(select_pop, toolbox, parents, lambda_, cxpb, mutpb)
+                offspring = algo.varOr(select_pop, toolbox, parents, lambda_, cxpb, mutpb, creator.Individual, creator.Strategy)
             ## Case collection + score
             # Selection with roulette or tournament, or score-proportionate of collection
 

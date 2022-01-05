@@ -53,13 +53,13 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
 
-            # ancestor = toolbox.clone(ind1) # BUG toolbox.clone doesn't make a new instance? Why?
-            ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
+            ancestor = toolbox.clone(ind1) # BUG toolbox.clone doesn't make a new instance? Why?
+            # ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
 
 
-            ### TEST REMOVE ME: BUG
-            ancestor.curiosity = 666.0
-            assert ind.curiosity != 666.0
+            ### TEST REMOVE ME: Test OK with clone_ind
+            # ancestor.curiosity = 666.0
+            # assert ind.curiosity != 666.0
             ### END TEST
 
             ind1, ind2 = toolbox.mate(ind1, ind2)

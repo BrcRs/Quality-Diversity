@@ -4,7 +4,7 @@ from container import hash_ind
 def clone_ind(ind, icls, scls):
     indcopy = icls(i for i in ind) # Individual
     indcopy.strategy = scls(i for i in ind.strategy) # Strategy
-    assert ind != indcopy
+    assert ind != indcopy, "copy " + str(indcopy) + "\nis the same as\n" + str(ind)
     return indcopy
 
 # Taken from deap library

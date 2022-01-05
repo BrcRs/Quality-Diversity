@@ -619,7 +619,7 @@ class Experiment:
 
 
             ## Compute quality of offspring + pop (?)
-            # TODO adapt
+            # DONE adapt
             for ind in pq:
                 if (self.custom_env['quality']=="FIT+NS"):
                     ind.fitness.values=(ind.fit,ind.novelty)
@@ -636,7 +636,7 @@ class Experiment:
 
 
 
-            # TODO adapt here
+            # DONE adapt here
             ## Case collection + no_sel
             # => generate pop at random
             if self.custom_env['selection'] == 'noselection':
@@ -701,13 +701,13 @@ class Experiment:
                 valuemax=newvaluemax
                 #print("Gen "+str(gen)+", new max ! max fit="+str(valuemax)+" index="+str(indexmax)+" BD="+str(pq[indexmax].bd))
                 nnfit, nnbd, log = self.eval_nn(pq[indexmax], env, resdir,render=True,dump=True,name="gen%04d"%(gen))
-            else:
+            elif verbose:
                 print(str(gen) +" " + str(newvaluemax)+ "  " + str(valuemax))
         fbd.close()
         finfo.close()
         ffit.close()
 
-        if self.custom_env['container'] == "grid":
+        if self.custom_env['container'] == "grid" and verbose:
             grid.stat_grid(resdir, nb_eval, dim=self.custom_env['dim_grid'])
             grid.dump_grid(resdir, dim=self.custom_env['dim_grid'])
 
@@ -748,7 +748,7 @@ class Experiment:
         for ind in grid.values():
             if ind.log["collision"]== 1000:
                 no_collision += 1
-        print("nb cellule without collisions == ", no_collision)
+        # print("nb cellule without collisions == ", no_collision)
 
         return pop, logbook, paretofront, grid, archive
 
@@ -761,7 +761,6 @@ def main():
         msg += "container=grid or archive\n"
         msg += "selection=noselection or random, pareto, score, pop, pop&arch\n"
         msg += "quality=NS or FIT+NS, FIT, NSLC, curiosity\n"
-        msg += "container=grid or archive\n"
         msg += "\n"
         msg += \
 "'nb_gen': 200, number of generations\n\

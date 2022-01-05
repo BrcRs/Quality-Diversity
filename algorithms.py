@@ -58,8 +58,8 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
 
 
             ### TEST REMOVE ME: Test OK with clone_ind
-            # ancestor.curiosity = 666.0
-            # assert ind.curiosity != 666.0
+            ancestor.curiosity = 666.0
+            assert ind.curiosity != 666.0
             ### END TEST
 
             ind1, ind2 = toolbox.mate(ind1, ind2)

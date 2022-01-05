@@ -756,24 +756,20 @@ def main():
     args = sys.argv[1:]
     if args[0] in ['help', 'h']:
         msg = "To specify parameters, write keyword=value for each parameter\n\
-            Example:\n\
-                python experiment.py container=grid nb_gen=10\n\nAvailable parameters:\n"
+        Example:\n\
+            python experiment.py container=grid nb_gen=10\n\nAvailable parameters:\n"
         msg += "container=grid or archive\n"
         msg += "selection=noselection or random, pareto, score, pop, pop&arch\n"
         msg += "quality=NS or FIT+NS, FIT, NSLC, curiosity\n"
         msg += "container=grid or archive\n"
         msg += "\n"
         msg += \
-        "'min_value': -30, min genotype value\n\
-        'max_value': 30, max genotype value\n\
-        'min_strategy': 0.5, min value for the mutation\n\
-        'max_strategy': 3, max value for the mutation\n\
-        'nb_gen': 200, number of generations\n\
-        'mu': 100, population size\n\
-        'lambda': 200, number of individuals generated\n\
-        'nov_k': 15, k parameter of novelty search\n\
-        'nov_add_strategy': 'random', archive addition strategy (either 'random' or 'novel' or 'Cully')\n\
-        'nov_lambda': 6, number of individuals added to the archive\n"
+"'nb_gen': 200, number of generations\n\
+'mu': 100, population size\n\
+'lambda': 200, number of individuals generated\n\
+'nov_k': 15, k parameter of novelty search\n\
+'nov_add_strategy': 'random', archive addition strategy (either 'random' or 'novel' or 'Cully')\n\
+'nov_lambda': 6, number of individuals added to the archive\n"
         print(msg)
         return
     ### In Cully2017,

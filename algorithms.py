@@ -65,8 +65,8 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
             ind = toolbox.clone(random.choice(population))
 
             # ancestor = toolbox.clone(ind)
-            ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
-            print("original:", ind1)
+            ancestor = clone_ind(ind, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
+            print("original:", ind)
             print("clone:", ancestor)
 
             ind, = toolbox.mutate(ind)

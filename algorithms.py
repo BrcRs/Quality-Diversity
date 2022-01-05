@@ -5,6 +5,7 @@ def clone_ind(ind, icls, scls):
     indcopy = icls(i for i in ind) # Individual
     indcopy.strategy = scls(i for i in ind.strategy) # Strategy
     assert ind is not indcopy, "copy " + str(indcopy) + "\nis the same ref as\n" + str(ind)
+    assert ind == indcopy, "Copy is not identical in value"
     return indcopy
 
 # Taken from deap library
@@ -58,7 +59,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
             print("clone:", ancestor)
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
-            assert ancestor != ind1
+            assert ancestor is not ind1
             offspring.append(ind1)
             parents[hash_ind(ind1)] = ancestor
         elif op_choice < cxpb + mutpb:  # Apply mutation
@@ -70,7 +71,12 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
             print("clone:", ancestor)
 
             ind, = toolbox.mutate(ind)
-            assert ancestor != ind # Doesn't pass... is it even a problem? definitely
+            # assert ancestor != ind # Doesn't pass... is it even a problem? definitely
+            assert ancestor is not ind
+            ### TEST REMOVE ME BUG
+            ancestor.curiosity = 666.0
+            assert ind.curiosity != 666.0
+            ### END TEST
 
             del ind.fitness.values
             offspring.append(ind)

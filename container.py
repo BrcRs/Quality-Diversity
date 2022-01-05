@@ -276,10 +276,10 @@ class Archive(Container):
             # TODO Curiosity update
             for ind in to_add:
                 if hash_ind(ind) in parents.keys():
-                    parents[hash_ind(ind)] += 1
+                    parents[hash_ind(ind)].curiosity += 1
             for ind in to_reject:
                 if hash_ind(ind) in parents.keys():
-                    parents[hash_ind(ind)] = max(0, parents[hash_ind(ind)] - 0.5) # TODO I suppose inf bound is 0?
+                    parents[hash_ind(ind)].curiosity = max(0, parents[hash_ind(ind)].curiosity - 0.5) # TODO I suppose inf bound is 0?
 
             pop += to_add
         elif(add_strategy=="novel"):

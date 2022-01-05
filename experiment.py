@@ -774,7 +774,8 @@ def main():
         'nov_k': 15, k parameter of novelty search\n\
         'nov_add_strategy': 'random', archive addition strategy (either 'random' or 'novel' or 'Cully')\n\
         'nov_lambda': 6, number of individuals added to the archive\n"
-
+        print(msg)
+        return
     ### In Cully2017,
     # nb ite = 50 000
     # batch size = 200

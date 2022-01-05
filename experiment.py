@@ -4,7 +4,7 @@ from deap import *
 import numpy as np
 from fixed_structure_nn_numpy import SimpleNeuralControllerNumpy
 from scipy.spatial import KDTree
-
+import math
 import warnings
 
 import datetime
@@ -407,6 +407,7 @@ class Experiment:
         fbd=open(resdir+"/bd.log","w")
         finfo=open(resdir+"/info.log","w")
         ffit=open(resdir+"/fit.log","w")
+        progress=open(resdir+"/progress.log","w")
 
         nb_eval=0
 
@@ -431,6 +432,12 @@ class Experiment:
         finfo.flush()
         ffit.write("## Generation 0 \n")
         ffit.flush()
+        progress.write("## Generation 0 \n")
+        progress.flush()
+        sum_quality=0
+        max_quality = -math.inf
+        sum_novelty =0
+        t=0
         for ind, (fit, bd, log) in zip(invalid_ind, fitnesses_bds):
             #print("Fit: "+str(fit)) 
             #print("BD: "+str(bd))
@@ -445,10 +452,14 @@ class Experiment:
                 ind.fitness.values=(0,0)
             elif (self.custom_env['quality']=="curiosity"):
                 ind.fitness.values=(0,)
-            
+            t=t+1
             ind.fit = fit # fit is the number of collisions? => YES
             ind.log = log
             ind.bd = bd
+            sum_quality= sum_quality+ ind.fit
+            sum_novelty= sum_novelty+ 0
+            if max_quality < fit:
+              max_quality = fit
             fbd.write(" ".join(map(str,bd))+"\n")
             fbd.flush()
             finfo.write(str(log)+"\n")
@@ -463,7 +474,8 @@ class Experiment:
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
-            
+        progress.write("0"+" "+str(sum_quality)+" "+ str(sum_novelty) + " " + str(max_quality)+"\n")
+        progress.flush()     
         if paretofront is not None:
             paretofront.update(population)
 
@@ -505,6 +517,8 @@ class Experiment:
             finfo.flush()
             ffit.write("## Generation %d \n"%(gen))
             ffit.flush()
+            progress.write("## Generation %d \n"%(gen))
+            progress.flush()
             """
             if (gen%10==0):
                 print("+",end="", flush=True)
@@ -617,7 +631,9 @@ class Experiment:
             else:
                 pq = collection
 
-
+            sum_quality=0
+            sum_quality=0
+            max_quality=-math.inf
             ## Compute quality of offspring + pop (?)
             # DONE adapt
             for ind in pq:
@@ -631,9 +647,13 @@ class Experiment:
                     ind.fitness.values=(ind.novelty,ind.lc)
                 elif (self.custom_env['quality']=="curiosity"):
                     ind.fitness.values=(ind.curiosity,)
-
+                sum_quality= sum_quality+ ind.fit
+                sum_novelty= sum_novelty+ ind.novelty
+                if max_quality < fit:
+                  max_quality = fit
                 #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
-
+            progress.write(str(len(pq))+" "+ str(sum_quality)+" "+ str(sum_novelty) + " " + str(max_quality)+"\n")
+            progress.flush() 
 
 
             # DONE adapt here
@@ -706,7 +726,7 @@ class Experiment:
         fbd.close()
         finfo.close()
         ffit.close()
-
+        progress.close()
         if self.custom_env['container'] == "grid" and verbose:
             grid.stat_grid(resdir, nb_eval, dim=self.custom_env['dim_grid'])
             grid.dump_grid(resdir, dim=self.custom_env['dim_grid'])

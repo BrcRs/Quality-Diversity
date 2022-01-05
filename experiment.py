@@ -821,6 +821,9 @@ def main():
     for arg in args:
         keywords = arg.split("=")
         key = keywords[0]
+        if key == "nowarning":
+            warnings.filterwarnings(action='ignore')
+            continue
         word = keywords[1]
         if key in ["container", "selection", "quality", 'nov_add_strategy']:
             exp.set_parameters({key : word})

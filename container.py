@@ -39,7 +39,7 @@ class Grid:
         for c in cells:
             if c in self.grid.keys():
                 cpt += 1
-                if self.grid(c).fit < ind.fit:
+                if self.grid[c].fit < ind.fit:
                     lc += 1
         return (1 - cpt) / len(cells), lc
 

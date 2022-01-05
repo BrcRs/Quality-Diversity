@@ -55,8 +55,13 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
 
             # ancestor = toolbox.clone(ind1) # BUG toolbox.clone doesn't make a new instance? Why?
             ancestor = clone_ind(ind1, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
-            print("original:", ind1)
-            print("clone:", ancestor)
+
+
+            ### TEST REMOVE ME: BUG
+            ancestor.curiosity = 666.0
+            assert ind.curiosity != 666.0
+            ### END TEST
+
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             assert ancestor is not ind1
@@ -65,15 +70,15 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
 
-            # ancestor = toolbox.clone(ind)
-            ancestor = clone_ind(ind, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
-            print("original:", ind)
-            print("clone:", ancestor)
+            ancestor = toolbox.clone(ind)
+            # ancestor = clone_ind(ind, *clone_args) # BUG toolbox.clone doesn't make a new instance? Why?
 
             ind, = toolbox.mutate(ind)
-            # assert ancestor != ind # Doesn't pass... is it even a problem? definitely
+            # assert ancestor != ind # Doesn't pass... is it even a problem? 
+            # No because '==' checks the values and 'is' checks the identities
             assert ancestor is not ind
-            ### TEST REMOVE ME BUG
+
+            ### TEST REMOVE ME: The test passes!
             ancestor.curiosity = 666.0
             assert ind.curiosity != 666.0
             ### END TEST

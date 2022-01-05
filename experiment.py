@@ -768,7 +768,7 @@ def main():
 'lambda': 200, number of individuals generated\n\
 'nov_k': 15, k parameter of novelty search\n\
 'nov_add_strategy': 'random', archive addition strategy (either 'random' or 'novel' or 'Cully')\n\
-'nov_lambda': 6, number of individuals added to the archive\n"
+'nov_lambda': 6, number of individuals added to the archive\n\nnowarning : hides warnings"
         print(msg)
         return
     ### In Cully2017,

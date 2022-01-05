@@ -33,12 +33,15 @@ class Grid:
         # DONE the novelty is $1 - number of filled cells around/nb neighbors$ 
         x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
         cpt = 0
+        lc = 0
         # Moore neighboring
         cells = [(x + i, y + j) for i in range(-k, k+1) for j in range(-k, k+1) if (i != 0 or i != j) and Grid.valid_coord((x, y), dim, min_v, max_v)] 
         for c in cells:
             if c in self.grid.keys():
                 cpt += 1
-        return (1 - cpt) / len(cells)
+                if self.grid(c).fit < ind.fit:
+                    lc += 1
+        return (1 - cpt) / len(cells), lc
 
     @staticmethod
     def get_grid_coord(bd, dim=[100, 100], min_v=[0,0], max_v=[1, 1]):
@@ -53,7 +56,7 @@ class Grid:
         """
         # DONE upd curiosity
         # update novelty
-        ind.novelty = self.get_nov(ind, k=k, dim=dim, min_v=min_v, max_v=max_v)
+        ind.novelty, ind.lc = self.get_nov(ind, k=k, dim=dim, min_v=min_v, max_v=max_v)
         # determining the grid cell coordinates to add to
         x, y = self.get_grid_coord(ind.bd, dim, min_v, max_v)
         if (x,y) in self.grid.keys():

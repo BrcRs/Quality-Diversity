@@ -413,8 +413,12 @@ class Experiment:
         ##
         ### Initial random generation: beginning
         ##
+        
         # grid container
         grid = Grid()
+
+        # archive container
+        archive = None
 
         # parents : dict, maintains who generated who during selection
         parents = dict()

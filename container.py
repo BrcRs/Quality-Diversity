@@ -319,7 +319,7 @@ class Archive(Container):
                     dpop=[]
                     fitpop = []
                     dpop = [o for o in pop]
-                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(ind.bd)-np.array(ind.bd)))
+                    dpop.sort(key=lambda i: np.linalg.norm(np.array(ind.bd)-np.array(i.bd)))
                     nearest = dpop[0]
                     sec_nearest = None
                     if len(dpop) > 1:

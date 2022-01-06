@@ -231,6 +231,7 @@ class Experiment:
         self.custom_env['selection'] = "undefined"
 
         self.custom_env['nov_add_strategy'] = "Cully"
+        self.custom_env['archive_density'] = 1
         # self.custom_env['nov_add_strategy'] = "random"
         if cont != None:
             self.set_container(cont)
@@ -488,7 +489,8 @@ class Experiment:
             archive = Archive.update_score(population, population, None, curio=curio, parents=parents, toolbox=toolbox,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
-                            _lambda=self.custom_env['nov_lambda'])
+                            _lambda=self.custom_env['nov_lambda'],
+                            _l=self.custom_env['archive_density'])
 
         ## Update the parents' curiosity
         container = {"archive" : archive, "grid" : grid}
@@ -603,7 +605,8 @@ class Experiment:
                 archive = Archive.update_score(offspring, offspring, archive, curio=curio, parents=parents, toolbox=toolbox,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
-                                _lambda=self.custom_env['nov_lambda'])
+                                _lambda=self.custom_env['nov_lambda'],
+                                _l=self.custom_env['archive_density'])
             
             ## Update the parents' curiosity
             print("Upd curiosity")
@@ -762,6 +765,7 @@ def main():
         msg += "container=grid or archive\n"
         msg += "selection=noselection or random, pareto, score, pop, pop&arch\n"
         msg += "quality=NS or FIT+NS, FIT, NSLC, curiosity\n"
+        msg += "archive_density=1 distance of individuals in the archive with Cully add strategy"
         msg += "\n"
         msg += \
 "'nb_gen': 200, number of generations\n\
@@ -830,6 +834,8 @@ def main():
             exp.set_parameters({key : word})
         elif key in ['nb_gen', 'mu', 'lambda', 'nov_k', 'nov_lambda']:
             exp.set_parameters({key : int(word)})
+        elif key in ['archive_density']:
+            exp.set_parameters({key : float(word)})
         else:
             warnings.warn("Unkown or unimplemented key: " + key)
         print("set", key, "to", word)

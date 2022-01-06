@@ -677,12 +677,14 @@ class Experiment:
             elif self.custom_env['selection'] in ['score', 'pop', 'pareto']:
                 if self.custom_env['quality'] == 'FIT':
                     w = [x.fit for x in pq]
-                    w = list(map(lambda x: x + min(w), w))
+                    if min(w) < 0:
+                        w = list(map(lambda x: x + abs(min(w)) + 1, w))
                     select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] == 'NS':
                     w = [x.novelty for x in pq]
-                    w = list(map(lambda x: x + min(w), w))
+                    if min(w) < 0:
+                        w = list(map(lambda x: x + abs(min(w)) + 1, w))
                     select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] in ["FIT+NS", "NSLC"]:
@@ -691,7 +693,8 @@ class Experiment:
 
                 elif self.custom_env['quality'] == "curiosity":
                     w = [x.curiosity for x in pq]
-                    w = list(map(lambda x: x + min(w), w))
+                    if min(w) <= 0:
+                        w = list(map(lambda x: x + abs(min(w)) + 1, w))
                     select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
             elif self.custom_env['selection'] == 'pop':

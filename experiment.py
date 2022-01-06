@@ -474,7 +474,7 @@ class Experiment:
             # TODO Make the grid work like the archive, maybe?
             # DONE do only if container = grid
             if self.custom_env['container'] == 'grid':
-                grid.add_to_grid(ind, fit, curio=curio, toolbox=toolbox,
+                grid.add_to_grid(ind, fit, curio=curio, parents=parents, toolbox=toolbox,
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
@@ -485,7 +485,7 @@ class Experiment:
 
         # DONE do only if container = archive
         if self.custom_env['container'] == 'archive':
-            archive = Archive.update_score(population, population, None, curio=curio, toolbox=toolbox,
+            archive = Archive.update_score(population, population, None, curio=curio, parents=parents, toolbox=toolbox,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
                             _lambda=self.custom_env['nov_lambda'])
@@ -493,8 +493,9 @@ class Experiment:
         ## Update the parents' curiosity
         container = {"archive" : archive, "grid" : grid}
         for ind in container[self.custom_env["container"]].pop:
-            if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
-                ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
+            if hash_ind(ind) in parents.keys():
+                ind.curiosity = max(0, ind.curiosity + curio[hash_ind(ind)])
+                del curio[hash_ind(ind)]
 
         for ind in population:
             if (self.custom_env['quality']=="FIT+NS"):
@@ -593,13 +594,13 @@ class Experiment:
             for ind in offspring:
                 # DONE only add from pq (defined later)
                 if self.custom_env['container'] == 'grid':
-                    grid.add_to_grid(ind, ind.fit, curio=curio, toolbox=toolbox,
+                    grid.add_to_grid(ind, ind.fit, curio=curio, parents=parents, toolbox=toolbox,
                                             dim=self.custom_env['dim_grid'], 
                                             min_v=self.custom_env['grid_min_v'], 
                                             max_v=self.custom_env['grid_max_v'])
             # update archive and novelty here
             if self.custom_env['container'] == 'archive':
-                archive = Archive.update_score(offspring, offspring, archive, curio=curio, toolbox=toolbox,
+                archive = Archive.update_score(offspring, offspring, archive, curio=curio, parents=parents, toolbox=toolbox,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
@@ -607,12 +608,12 @@ class Experiment:
             ## Update the parents' curiosity
             print("Upd curiosity")
             for ind in pq:
-                if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
+                if hash_ind(ind) in parents.keys():
                     # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
-                    ind.curiosity += curio[parents[hash_ind(ind)]]
+                    ind.curiosity += curio[hash_ind(ind)]
                     # print("upd", ind.curiosity, "with", curio[parents[hash_ind(ind)]])
-                    print(curio[parents[hash_ind(ind)]], end=' ')
-                    del curio[parents[hash_ind(ind)]]
+                    print(curio[hash_ind(ind)], end=' ')
+                    del curio[hash_ind(ind)]
             print()
             print("FITNESS")
             print(*[ind.fit for ind in collection])

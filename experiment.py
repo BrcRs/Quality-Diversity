@@ -626,9 +626,14 @@ class Experiment:
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
 
+            # Log metrics
+            sum_quality = sum([ind.fit for ind in collection])
+            sum_novelty = sum([ind.novelty for ind in collection])
+            max_quality = max([ind.fit for ind in collection])
+            # max_quality=-math.inf
+            progress.write(str(len(collection))+" "+ str(sum_quality)+" "+ str(sum_novelty) + " " + str(max_quality)+"\n")
+            progress.flush() 
 
-            sum_quality=0
-            max_quality=-math.inf
             ## Update fitness.values for nsga2
             for ind in pq:
                 if (self.custom_env['quality']=="FIT+NS"):
@@ -641,13 +646,11 @@ class Experiment:
                     ind.fitness.values=(ind.novelty,ind.lc)
                 elif (self.custom_env['quality']=="curiosity"):
                     ind.fitness.values=(ind.curiosity,)
-                sum_quality= sum_quality+ ind.fit
-                sum_novelty= sum_novelty+ ind.novelty
+                # sum_quality= sum_quality+ ind.fit
+                # sum_novelty= sum_novelty+ ind.novelty
                 if max_quality < fit:
                   max_quality = fit
                 #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
-            progress.write(str(len(pq))+" "+ str(sum_quality)+" "+ str(sum_novelty) + " " + str(max_quality)+"\n")
-            progress.flush() 
 
 
             # DONE adapt here

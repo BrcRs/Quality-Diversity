@@ -29,7 +29,7 @@ from scoop import futures
 
 #from novelty_search_vanila import *
 # from novelty_search import *
-from container import Archive, Grid
+from container import Archive, Grid, hash_ind
 import os
 
 import sys
@@ -421,8 +421,12 @@ class Experiment:
         # archive container
         archive = None
 
-        # parents : dict, maintains who generated who during selection
-        parents = dict()
+        # parents will record the parent of who
+        # {hash_ind(ind) : hash_ind(parent)}
+        parents = {}
+        # curio
+        # {ind : change in curiosity}
+        curio = {} # change in curiosity for each ind to apply to its parent
 
         # Evaluate the individuals with an invalid (i.e. not yet evaluated) fitness
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -470,7 +474,7 @@ class Experiment:
             # TODO Make the grid work like the archive, maybe?
             # DONE do only if container = grid
             if self.custom_env['container'] == 'grid':
-                grid.add_to_grid(ind, fit, parents, 
+                grid.add_to_grid(ind, fit, curio=curio, 
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
@@ -485,6 +489,12 @@ class Experiment:
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
                             _lambda=self.custom_env['nov_lambda'])
+
+        ## Update the parents' curiosity
+        container = {"archive" : archive, "grid" : grid}
+        for ind in container[self.custom_env["container"]].pop:
+            if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
+                ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
 
         for ind in population:
             if (self.custom_env['quality']=="FIT+NS"):
@@ -508,8 +518,8 @@ class Experiment:
         ### Initial random generation: end
         ##
         # Selected individuals for variation
-        select_pop = population.copy() # TODO Warning! (Deep) copy necessary? YES copy atleast
-
+        # select_pop = population.copy() # TODO Warning! (Deep) copy necessary? YES copy atleast
+        select_pop = []
         # Begin the generational process
         for gen in range(1, ngen + 1):
             finfo.write("## Generation %d \n"%(gen))
@@ -524,7 +534,8 @@ class Experiment:
             else:
                 print(".",end="", flush=True)
             """
-
+            ## reset curio
+            curio = {}
             # Variation of the previously selected population
             # DONE adapt variation
             # Note: in Cully2017, they didn't use crossover
@@ -542,7 +553,7 @@ class Experiment:
             # => offspring = polynomial variation of the filtered collection, aka container
             elif self.custom_env['selection'] in ["random", "pareto", "score", "pop", "pop&arch"]:
                 # by default, cxpb = 0., no crossover
-                offspring = algo.varOr(select_pop, toolbox, parents, lambda_, cxpb, mutpb, creator.Individual, creator.Strategy)
+                offspring = algo.varOr(population, toolbox, parents, lambda_, cxpb, mutpb, creator.Individual, creator.Strategy)
             ## Case collection + score
             # Selection with roulette or tournament, or score-proportionate of collection
 
@@ -590,11 +601,6 @@ class Experiment:
                 ffit.write(str(fit)+"\n")
                 ffit.flush()
                 # DONE change that to generalize to all container types
-                if self.custom_env['container'] == 'grid':
-                    grid.add_to_grid(ind, ind.fit, parents, 
-                                            dim=self.custom_env['dim_grid'], 
-                                            min_v=self.custom_env['grid_min_v'], 
-                                            max_v=self.custom_env['grid_max_v'])
 
 
             ## Choice of the collection
@@ -619,12 +625,41 @@ class Experiment:
             else:
                 pq = collection
 
+            # parents will record the changes for every parents
+            # {parent : change in curiosity}
+            parents = {}
+            for ind in pq:
+                # DONE only add from pq (defined later)
+                if self.custom_env['container'] == 'grid':
+                    grid.add_to_grid(ind, ind.fit, curio=curio, 
+                                            dim=self.custom_env['dim_grid'], 
+                                            min_v=self.custom_env['grid_min_v'], 
+                                            max_v=self.custom_env['grid_max_v'])
             # update archive and novelty here, needs to be done before selection
             if self.custom_env['container'] == 'archive':
                 archive = Archive.update_score(pq, offspring, archive, parents=parents,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
+            
+            ## Update the parents' curiosity
+            for ind in container[self.custom_env["container"]].pop:
+                if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
+                    ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
+
+            print("FITNESS")
+            print(*[ind.fit for ind in collection])
+            print("NOV")
+            print(*[ind.novelty for ind in collection])
+            print("CURIOSITY")
+            print(*[ind.curiosity for ind in collection])
+            print("PARENTS")
+            print(*[v.curiosity for v in parents.values()])
+            coll_in_parent = sum([1 for ind in collection if ind in parents.values()])
+            print("IND in PARENTS:", coll_in_parent, "/", len(collection), "in collection")
+            parents_upd_in_coll = [ind.curiosity for ind in parents.values() if ind in collection and ind.curiosity != 0]
+            print("Parents in collection with curiosity != 0:")
+            print(parents_upd_in_coll)
 
             # Log metrics
             sum_quality = sum([ind.fit for ind in collection])
@@ -669,21 +704,21 @@ class Experiment:
             # filter with NSGA-II
             elif self.custom_env['selection'] in ['score', 'pop', 'pareto']:
                 if self.custom_env['quality'] == 'FIT':
-                    select_pop = random.choices(pq, weights = [x.fit for x in pq], k=min(mu, len(pq)))
+                    select_pop = random.choices(pq, weights = [x.fit +1 for x in pq], k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] == 'NS':
-                    select_pop = random.choices(pq, weights = [x.novelty for x in pq], k=min(mu, len(pq)))
+                    select_pop = random.choices(pq, weights = [x.novelty +1 for x in pq], k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] in ["FIT+NS", "NSLC"]:
                     select_pop = toolbox.select(pq, min(mu, len(pq))) 
 
                 elif self.custom_env['quality'] == "curiosity":
-                    select_pop = random.choices(pq, weights = [x.curiosity for x in pq], k=min(mu, len(pq)))
+                    select_pop = random.choices(pq, weights = [x.curiosity +1 for x in pq], k=min(mu, len(pq)))
 
             elif self.custom_env['selection'] == 'pop':
                 select_pop = population + select_pop
 
-
+            population = select_pop
             ### old ways ########
             # population[:] = toolbox.select(pq, mu) 
             #####################

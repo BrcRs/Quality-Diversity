@@ -50,7 +50,7 @@ class Grid:
         y = dim[1]*y//(max_v[1] - min_v[1])
         return (x,y)
 
-    def add_to_grid(self, ind, local_quality, curio, toolbox, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
+    def add_to_grid(self, ind, local_quality, curio, parents, toolbox, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
         """
         :param k: Subgrid size
         """
@@ -64,20 +64,20 @@ class Grid:
             if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
                 self.grid[(x,y)] = toolbox.clone(ind)
                 # update curio
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] += 1
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] += 1
             else:
                 # update curio
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] -= 0.5
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] -= 0.5
         else:
             self.grid[(x,y)] = toolbox.clone(ind)
             # update curio
-            curio.setdefault(hash_ind(ind), 0)
-            if hash_ind(ind) in curio.keys():
-                curio[hash_ind(ind)] += 1
+            curio.setdefault(parents[hash_ind(ind)], 0)
+            if parents[hash_ind(ind)] in curio.keys():
+                curio[parents[hash_ind(ind)]] += 1
 
     def get_pop(self):
         return list(self.grid.values())
@@ -222,7 +222,7 @@ class Archive(Container):
         raise NotImplementedError()
 
     @staticmethod
-    def update_score(population, offspring, archive, curio, toolbox, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
+    def update_score(population, offspring, archive, curio, parents, toolbox, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
         """Update the novelty criterion (including archive update) 
 
         Implementation of novelty search following (Gomes, J., Mariano, P., & Christensen, A. L. (2015, July). Devising effective novelty search algorithms: A comprehensive empirical study. In Proceedings of GECCO 2015 (pp. 943-950). ACM.).
@@ -281,13 +281,13 @@ class Archive(Container):
 
             # TODO Curiosity update
             for ind in to_add:
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] += 1
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] += 1
             for ind in to_reject:
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] -= 0.5
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] -= 0.5
 
             pop += to_add
         elif(add_strategy=="novel"):
@@ -300,13 +300,13 @@ class Archive(Container):
             to_reject = list(map(toolbox.clone, soff[:ilast]))
             # TODO Curiosity update
             for ind in to_add:
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] += 1
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] += 1
             for ind in to_reject:
-                curio.setdefault(hash_ind(ind), 0)
-                if hash_ind(ind) in curio.keys():
-                    curio[hash_ind(ind)] -= 0.5
+                curio.setdefault(parents[hash_ind(ind)], 0)
+                if parents[hash_ind(ind)] in curio.keys():
+                    curio[parents[hash_ind(ind)]] -= 0.5
 
             pop += to_add
             if (verbose):
@@ -314,25 +314,25 @@ class Archive(Container):
                 for offs in soff[ilast:len(soff)]:
                     print("    nov="+str(offs.novelty)+" fit="+str(offs.fitness.values)+" bd="+str(offs.bd))
         elif add_strategy == "Cully":
-            for i in population:
+            for ind in population:
                 if len(pop) > 0:
                     dpop=[]
                     fitpop = []
                     dpop = [o for o in pop]
-                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(i.bd)-np.array(ind.bd)))
+                    dpop.sort(key=lambda ind: np.linalg.norm(np.array(ind.bd)-np.array(ind.bd)))
                     nearest = dpop[0]
                     sec_nearest = None
                     if len(dpop) > 1:
                         sec_nearest = dpop[1]
                     # Distance to nearest distance exceeds predefined threshold l?
-                    if np.linalg.norm(np.array(i.bd)-np.array(nearest.bd)) > _l:
+                    if np.linalg.norm(np.array(ind.bd)-np.array(nearest.bd)) > _l:
                         # add it
-                        pop.append(toolbox.clone(i))
+                        pop.append(toolbox.clone(ind))
                         # update curiosity
-                        curio.setdefault(hash_ind(i), 0)
-                        if hash_ind(i) in curio.keys():
-                            curio[hash_ind(i)] += 1
-                    elif (sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(i, nearest, eps):
+                        curio.setdefault(parents[hash_ind(ind)], 0)
+                        if parents[hash_ind(ind)] in curio.keys():
+                            curio[parents[hash_ind(ind)]] += 1
+                    elif (sec_nearest == None or np.linalg.norm(np.array(ind.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(ind, nearest, eps):
                         # we can replace the nearest neighbor if:
                         # the distance to the second nearest exceeds l
                         # and if it improves the quality or the novelty score
@@ -341,28 +341,28 @@ class Archive(Container):
                             # novelty(x) >= (1-eps) * novelty(y)
                             # quality(x) >= (1-eps) * quality(y)
                             # (novelty(x) - novelty(y)) * quality(y) > -(quality(x) - quality(y)) * novelty(y)
-                        pop.append(toolbox.clone(i))
+                        pop.append(toolbox.clone(ind))
                         # update curiosity
-                        curio.setdefault(hash_ind(i), 0)
-                        if hash_ind(i) in curio.keys():
-                            curio[hash_ind(i)] += 1
+                        curio.setdefault(parents[hash_ind(ind)], 0)
+                        if parents[hash_ind(ind)] in curio.keys():
+                            curio[parents[hash_ind(ind)]] += 1
                         
                         assert nearest in pop
                         pop.remove(nearest)
                     else:
                         # Rejected
                         # update curiosity
-                        curio.setdefault(hash_ind(i), 0)
-                        if hash_ind(i) in curio.keys():
-                            curio[hash_ind(i)] -= 0.5
+                        curio.setdefault(parents[hash_ind(ind)], 0)
+                        if parents[hash_ind(ind)] in curio.keys():
+                            curio[parents[hash_ind(ind)]] -= 0.5
 
 
                 else:
-                    pop.append(toolbox.clone(i))
+                    pop.append(toolbox.clone(ind))
                     # update curiosity
-                    curio.setdefault(hash_ind(i), 0)
-                    if hash_ind(i) in curio.keys():
-                        curio[hash_ind(i)] += 1
+                    curio.setdefault(parents[hash_ind(ind)], 0)
+                    if parents[hash_ind(ind)] in curio.keys():
+                        curio[parents[hash_ind(ind)]] += 1
 
             # lbd, lbd_fit = return_bd_fit(pop)
         else:

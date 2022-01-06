@@ -75,6 +75,7 @@ class Grid:
         else:
             self.grid[(x,y)] = toolbox.clone(ind)
             # update curio
+            curio.setdefault(hash_ind(ind), 0)
             if hash_ind(ind) in curio.keys():
                 curio[hash_ind(ind)] += 1
 

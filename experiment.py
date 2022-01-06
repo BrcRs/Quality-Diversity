@@ -608,7 +608,7 @@ class Experiment:
             ## Update the parents' curiosity
             print("Upd curiosity")
             for ind in pq:
-                if hash_ind(ind) in parents.keys():
+                if hash_ind(ind) in curio.keys():
                     # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
                     ind.curiosity += curio[hash_ind(ind)]
                     # print("upd", ind.curiosity, "with", curio[parents[hash_ind(ind)]])

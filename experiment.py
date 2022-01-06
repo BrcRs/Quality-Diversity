@@ -695,6 +695,7 @@ class Experiment:
                     w = [x.curiosity for x in pq]
                     if min(w) <= 0:
                         w = list(map(lambda x: x + abs(min(w)) + 1, w))
+                    assert len([x for x in w if x <= 0]) == 0
                     select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
             elif self.custom_env['selection'] == 'pop':

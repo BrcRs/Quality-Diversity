@@ -457,7 +457,7 @@ class Experiment:
             ind.log = log
             ind.bd = bd
             sum_quality= sum_quality+ ind.fit
-            sum_novelty= sum_novelty+ 0
+            sum_novelty= sum_novelty+ 0 # TODO why +0?
             if max_quality < fit:
               max_quality = fit
             fbd.write(" ".join(map(str,bd))+"\n")
@@ -479,7 +479,6 @@ class Experiment:
         if paretofront is not None:
             paretofront.update(population)
 
-        # TODO adapt
         # DONE do only if container = archive
         if self.custom_env['container'] == 'archive':
             archive = Archive.update_score(population, population, None, parents=parents,
@@ -598,17 +597,6 @@ class Experiment:
                                             max_v=self.custom_env['grid_max_v'])
 
 
-            # sel_selector = {
-            #     "noselection" : lambda *_: toolbox.population(n=mu), # random generation
-            #     "random": lambda *x: , # random selection
-            #     "pareto"
-            #     "score"
-            #     "pop"
-            #     "pop&arch"
-
-            # }
-            # select_pop = sel_selector[self.custom_env['selection']](population)
-
             ## Choice of the collection
             collection = []
             if self.custom_env['container'] == 'grid':
@@ -631,11 +619,17 @@ class Experiment:
             else:
                 pq = collection
 
-            sum_quality=0
+            # update archive and novelty here, needs to be done before selection
+            if self.custom_env['container'] == 'archive':
+                archive = Archive.update_score(pq, offspring, archive, parents=parents,
+                                k=self.custom_env['nov_k'],
+                                add_strategy=self.custom_env['nov_add_strategy'],
+                                _lambda=self.custom_env['nov_lambda'])
+
+
             sum_quality=0
             max_quality=-math.inf
-            ## Compute quality of offspring + pop (?)
-            # DONE adapt
+            ## Update fitness.values for nsga2
             for ind in pq:
                 if (self.custom_env['quality']=="FIT+NS"):
                     ind.fitness.values=(ind.fit,ind.novelty)
@@ -687,30 +681,10 @@ class Experiment:
                 select_pop = population + select_pop
 
 
-    
-
-
-            # Select the next generation population
-            # TODO Selection is done here!
-
-
-            # so pop size is always mu, but offspring size is lambda, pop is thus 
-            # mu individuals from pop + offspring,
-            # We take mu among mu + lambda people
-            # lambda is only the number of individuals generated as an offspring
-
             ### old ways ########
             # population[:] = toolbox.select(pq, mu) 
             #####################
 
-            # Already done earlier Update novelty for grid?
-
-            # Update the archive, must be done at the end
-            if self.custom_env['container'] == 'archive':
-                archive = Archive.update_score(pq, offspring, archive, parents=parents,
-                                k=self.custom_env['nov_k'],
-                                add_strategy=self.custom_env['nov_add_strategy'],
-                                _lambda=self.custom_env['nov_lambda'])
 
             # Update the hall of fame with the generated individuals
             if paretofront is not None:

@@ -518,8 +518,8 @@ class Experiment:
         ### Initial random generation: end
         ##
         # Selected individuals for variation
-        # select_pop = population.copy() # TODO Warning! (Deep) copy necessary? YES copy atleast
-        select_pop = []
+        # select_pop = []
+        offspring = population.copy()
         # Begin the generational process
         for gen in range(1, ngen + 1):
             finfo.write("## Generation %d \n"%(gen))
@@ -536,49 +536,19 @@ class Experiment:
             """
             ## reset curio
             curio = {}
+
+
             # Variation of the previously selected population
-            # DONE adapt variation
-            # Note: in Cully2017, they didn't use crossover
-
-            #### From collection
-            # The collection can wether be the population or the archive or the grid
-            # so collection == container?
-
-            ## Case collection + no_sel
-            # => offspring = pop because pop is already generated at random
             if self.custom_env['selection'] == 'noselection':
                 offspring = population.copy()
                 parents = dict() # no ancestors because generated at random
-            ## Case collection + random sel
-            # => offspring = polynomial variation of the filtered collection, aka container
             elif self.custom_env['selection'] in ["random", "pareto", "score", "pop", "pop&arch"]:
-                # by default, cxpb = 0., no crossover
                 offspring = algo.varOr(population, toolbox, parents, lambda_, cxpb, mutpb, creator.Individual, creator.Strategy)
-            ## Case collection + score
-            # Selection with roulette or tournament, or score-proportionate of collection
-
-            #### From population
-            ## Case collection + pop based
-            # new offspring generated from current offsprings + parents
-            # Then selection with roulette or tournament, or score-proportionate
-
-            ## Case collection + Pareto
-            # => offspring = variation of the filtered pop (filter with NSGA-II)
-
             
-            ## old ways ##############
-            # if self.custom_env['container'] == "grid" :
-            #     # special treatment of the grid
-            #     offspring = algorithms.varAnd(random.sample(list(grid.values()), 2),toolbox,cxpb,mutpb) # len(offspring) = ... 2?? Not good! TODO
-            # elif self.custom_env['container'] == "archive" :
-            #     offspring = algorithms.varOr(population, toolbox, lambda_, cxpb, mutpb) # len(offspring) = lambda
-            #########################
-
             # Evaluate the individuals with an invalid (i.e. not yet evaluated) fitness
             invalid_ind = [ind for ind in offspring]
             fitnesses_bds = toolbox.map(toolbox.evaluate, invalid_ind)
             nb_eval+=len(invalid_ind)
-
             for ind, (fit, bd, log) in zip(invalid_ind, fitnesses_bds):
                 #print("Fit: "+str(fit)+" BD: "+str(bd)) 
                 if (self.custom_env['quality']=="FIT+NS"):
@@ -604,14 +574,7 @@ class Experiment:
 
 
             ## Choice of the collection
-            collection = []
-            if self.custom_env['container'] == 'grid':
-                collection = grid.get_pop().copy()
-            elif self.custom_env['container'] == 'archive':
-                collection = archive.get_pop().copy()
-            else:
-                raise ValueError("Unknown container type: " + self.custom_env['container'] 
-                + "\nPossible values are 'grid' and 'archive'")
+            collection = container[self.custom_env["container"]].pop.copy()
 
             pq = []
             #### From population
@@ -625,26 +588,27 @@ class Experiment:
             else:
                 pq = collection
 
+            ### Add to container
             # # parents will record the changes for every parents
             # # {parent : change in curiosity}
             # parents = {}
-            for ind in pq:
+            for ind in offspring:
                 # DONE only add from pq (defined later)
                 if self.custom_env['container'] == 'grid':
                     grid.add_to_grid(ind, ind.fit, curio=curio, toolbox=toolbox,
                                             dim=self.custom_env['dim_grid'], 
                                             min_v=self.custom_env['grid_min_v'], 
                                             max_v=self.custom_env['grid_max_v'])
-            # update archive and novelty here, needs to be done before selection
+            # update archive and novelty here
             if self.custom_env['container'] == 'archive':
-                archive = Archive.update_score(pq, offspring, archive, curio=curio, toolbox=toolbox,
+                archive = Archive.update_score(offspring, offspring, archive, curio=curio, toolbox=toolbox,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
             
             ## Update the parents' curiosity
             print("Upd curiosity")
-            for ind in container[self.custom_env["container"]].pop:
+            for ind in pq:
                 if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
                     # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
                     ind.curiosity += curio[parents[hash_ind(ind)]]
@@ -687,8 +651,8 @@ class Experiment:
                     ind.fitness.values=(ind.curiosity,)
                 # sum_quality= sum_quality+ ind.fit
                 # sum_novelty= sum_novelty+ ind.novelty
-                if max_quality < fit:
-                  max_quality = fit
+                # if max_quality < fit:
+                #   max_quality = fit
                 #print("Fitness values: "+str(ind.fitness.values)+" Fit=%f Nov=%f"%(ind.fit, ind.novelty))
 
 

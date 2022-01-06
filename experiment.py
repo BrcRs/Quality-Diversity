@@ -627,8 +627,10 @@ class Experiment:
             print("PARENTS")
             print(parents)
             # print(*[curio[v] for v in parents.values()])
-            coll_in_parent = sum([1 for ind in collection if hash_ind(ind) in parents.values()])
-            print("IND in PARENTS:", coll_in_parent, "/", len(collection), "in collection")
+            coll_children = sum([1 for ind in collection if hash_ind(ind) in parents.keys()])
+            print("Number of ind in collection which have a parent:", coll_children, "/", len(collection))
+            coll_parents = sum([1 for ind in collection if hash_ind(ind) in parents.values()])
+            print("Number of ind in collection which are a parent:", coll_parents, "/", len(collection))
             # parents_upd_in_coll = [ind.curiosity for ind in parents.values() if ind in collection and ind.curiosity != 0]
             # print("Parents in collection with curiosity != 0:")
             # print(parents_upd_in_coll)

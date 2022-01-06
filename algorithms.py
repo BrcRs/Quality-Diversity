@@ -69,7 +69,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
             del ind1.fitness.values
             assert ancestor is not ind1
             offspring.append(ind1)
-            parents[hash_ind(ind1)] = ancestor
+            parents[hash_ind(ind1)] = hash_ind(ancestor)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
 
@@ -88,7 +88,7 @@ def varOr(population, toolbox, parents, lambda_, cxpb, mutpb, *clone_args):
 
             del ind.fitness.values
             offspring.append(ind)
-            parents[hash_ind(ind)] = ancestor
+            parents[hash_ind(ind)] = hash_ind(ancestor)
         else:                           # Apply reproduction
             offspring.append(random.choice(population))
 

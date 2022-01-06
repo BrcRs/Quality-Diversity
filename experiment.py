@@ -462,7 +462,7 @@ class Experiment:
             ind.bd = bd
             sum_quality= sum_quality+ ind.fit
             sum_novelty= sum_novelty+ 0 # TODO why +0?
-            if max_quality < fit:
+            if max_quality > fit: # we want to minimize the fitness which is at least -1000 and increases with collisions
               max_quality = fit
             fbd.write(" ".join(map(str,bd))+"\n")
             fbd.flush()
@@ -645,7 +645,8 @@ class Experiment:
             ## Update the parents' curiosity
             for ind in container[self.custom_env["container"]].pop:
                 if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
-                    ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
+                    # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
+                    ind.curiosity += curio[parents[hash_ind(ind)]]
 
             print("FITNESS")
             print(*[ind.fit for ind in collection])
@@ -665,7 +666,7 @@ class Experiment:
             # Log metrics
             sum_quality = sum([ind.fit for ind in collection])
             sum_novelty = sum([ind.novelty for ind in collection])
-            max_quality = max([ind.fit for ind in collection])
+            max_quality = min([ind.fit for ind in collection]) # minimize the fitness
             # max_quality=-math.inf
             progress.write(str(len(collection))+" "+ str(sum_quality)+" "+ str(sum_novelty) + " " + str(max_quality)+"\n")
             progress.flush() 

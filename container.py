@@ -50,7 +50,7 @@ class Grid:
         y = dim[1]*y//(max_v[1] - min_v[1])
         return (x,y)
 
-    def add_to_grid(self, ind, local_quality, parents, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
+    def add_to_grid(self, ind, local_quality, curio, toolbox, dim=[100, 100], min_v=[0,0], max_v=[1, 1], add_strategy="Cully", k=1):
         """
         :param k: Subgrid size
         """
@@ -64,17 +64,19 @@ class Grid:
             if local_quality < self.grid[(x,y)].fit: # this assumes that the lower the number of collisions, the better
                 self.grid[(x,y)] = toolbox.clone(ind)
                 # update curio
-                if hash_ind(ind) in parents.keys():
-                    parents[hash_ind(ind)].curiosity += 1
+                curio.setdefault(hash_ind(ind), 0)
+                if hash_ind(ind) in curio.keys():
+                    curio[hash_ind(ind)] += 1
             else:
                 # update curio
-                if hash_ind(ind) in parents.keys():
-                    parents[hash_ind(ind)].curiosity = max(0, parents[hash_ind(ind)].curiosity - 0.5)
+                curio.setdefault(hash_ind(ind), 0)
+                if hash_ind(ind) in curio.keys():
+                    curio[hash_ind(ind)] -= 0.5
         else:
             self.grid[(x,y)] = toolbox.clone(ind)
             # update curio
-            if hash_ind(ind) in parents.keys():
-                parents[hash_ind(ind)].curiosity += 1
+            if hash_ind(ind) in curio.keys():
+                curio[hash_ind(ind)] += 1
 
     def get_pop(self):
         return list(self.grid.values())
@@ -219,7 +221,7 @@ class Archive(Container):
         raise NotImplementedError()
 
     @staticmethod
-    def update_score(population, offspring, archive, curio, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
+    def update_score(population, offspring, archive, curio, toolbox, k=15, add_strategy="random", _lambda=6, verbose=False, _l=0.01, eps=0.1):
         """Update the novelty criterion (including archive update) 
 
         Implementation of novelty search following (Gomes, J., Mariano, P., & Christensen, A. L. (2015, July). Devising effective novelty search algorithms: A comprehensive empirical study. In Proceedings of GECCO 2015 (pp. 943-950). ACM.).

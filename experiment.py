@@ -643,10 +643,12 @@ class Experiment:
                                 _lambda=self.custom_env['nov_lambda'])
             
             ## Update the parents' curiosity
+            print("Upd curiosity")
             for ind in container[self.custom_env["container"]].pop:
                 if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
                     # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
                     ind.curiosity += curio[parents[hash_ind(ind)]]
+                    print("upd", ind.curiosity, "with", curio[parents[hash_ind(ind)]])
 
             print("FITNESS")
             print(*[ind.fit for ind in collection])

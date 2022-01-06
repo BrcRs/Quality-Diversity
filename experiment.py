@@ -676,16 +676,23 @@ class Experiment:
             # filter with NSGA-II
             elif self.custom_env['selection'] in ['score', 'pop', 'pareto']:
                 if self.custom_env['quality'] == 'FIT':
-                    select_pop = random.choices(pq, weights = [x.fit +1 for x in pq], k=min(mu, len(pq)))
+                    w = [x.fit for x in pq]
+                    w = list(map(lambda x: x + min(w), w))
+                    select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] == 'NS':
-                    select_pop = random.choices(pq, weights = [x.novelty +1 for x in pq], k=min(mu, len(pq)))
+                    w = [x.novelty for x in pq]
+                    w = list(map(lambda x: x + min(w), w))
+                    select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
                 elif self.custom_env['quality'] in ["FIT+NS", "NSLC"]:
+                    
                     select_pop = toolbox.select(pq, min(mu, len(pq))) 
 
                 elif self.custom_env['quality'] == "curiosity":
-                    select_pop = random.choices(pq, weights = [x.curiosity +1 for x in pq], k=min(mu, len(pq)))
+                    w = [x.curiosity for x in pq]
+                    w = list(map(lambda x: x + min(w), w))
+                    select_pop = random.choices(pq, weights = w, k=min(mu, len(pq)))
 
             elif self.custom_env['selection'] == 'pop':
                 select_pop = population + select_pop

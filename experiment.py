@@ -534,8 +534,6 @@ class Experiment:
             else:
                 print(".",end="", flush=True)
             """
-            ## reset curio
-            curio = {}
 
 
             # Variation of the previously selected population
@@ -612,8 +610,10 @@ class Experiment:
                 if hash_ind(ind) in parents.keys() and parents[hash_ind(ind)] in curio.keys():
                     # ind.curiosity = max(0, ind.curiosity + curio[parents[hash_ind(ind)]])
                     ind.curiosity += curio[parents[hash_ind(ind)]]
-                    print("upd", ind.curiosity, "with", curio[parents[hash_ind(ind)]])
-
+                    # print("upd", ind.curiosity, "with", curio[parents[hash_ind(ind)]])
+                    print(curio[parents[hash_ind(ind)]], end=' ')
+                    del curio[parents[hash_ind(ind)]]
+            print()
             print("FITNESS")
             print(*[ind.fit for ind in collection])
             print("NOV")

@@ -474,7 +474,7 @@ class Experiment:
             # TODO Make the grid work like the archive, maybe?
             # DONE do only if container = grid
             if self.custom_env['container'] == 'grid':
-                grid.add_to_grid(ind, fit, curio=curio, 
+                grid.add_to_grid(ind, fit, curio=curio, toolbox=toolbox,
                                         dim=self.custom_env['dim_grid'], 
                                         min_v=self.custom_env['grid_min_v'], 
                                         max_v=self.custom_env['grid_max_v'])
@@ -485,7 +485,7 @@ class Experiment:
 
         # DONE do only if container = archive
         if self.custom_env['container'] == 'archive':
-            archive = Archive.update_score(population, population, None, parents=parents,
+            archive = Archive.update_score(population, population, None, curio=curio, toolbox=toolbox,
                             k=self.custom_env['nov_k'],
                             add_strategy=self.custom_env['nov_add_strategy'],
                             _lambda=self.custom_env['nov_lambda'])
@@ -625,19 +625,19 @@ class Experiment:
             else:
                 pq = collection
 
-            # parents will record the changes for every parents
-            # {parent : change in curiosity}
-            parents = {}
+            # # parents will record the changes for every parents
+            # # {parent : change in curiosity}
+            # parents = {}
             for ind in pq:
                 # DONE only add from pq (defined later)
                 if self.custom_env['container'] == 'grid':
-                    grid.add_to_grid(ind, ind.fit, curio=curio, 
+                    grid.add_to_grid(ind, ind.fit, curio=curio, toolbox=toolbox,
                                             dim=self.custom_env['dim_grid'], 
                                             min_v=self.custom_env['grid_min_v'], 
                                             max_v=self.custom_env['grid_max_v'])
             # update archive and novelty here, needs to be done before selection
             if self.custom_env['container'] == 'archive':
-                archive = Archive.update_score(pq, offspring, archive, parents=parents,
+                archive = Archive.update_score(pq, offspring, archive, curio=curio, toolbox=toolbox,
                                 k=self.custom_env['nov_k'],
                                 add_strategy=self.custom_env['nov_add_strategy'],
                                 _lambda=self.custom_env['nov_lambda'])
@@ -654,12 +654,12 @@ class Experiment:
             print("CURIOSITY")
             print(*[ind.curiosity for ind in collection])
             print("PARENTS")
-            print(*[v.curiosity for v in parents.values()])
-            coll_in_parent = sum([1 for ind in collection if ind in parents.values()])
-            print("IND in PARENTS:", coll_in_parent, "/", len(collection), "in collection")
-            parents_upd_in_coll = [ind.curiosity for ind in parents.values() if ind in collection and ind.curiosity != 0]
-            print("Parents in collection with curiosity != 0:")
-            print(parents_upd_in_coll)
+            # print(*[v.curiosity for v in parents.values()])
+            # coll_in_parent = sum([1 for ind in collection if ind in parents.values()])
+            # print("IND in PARENTS:", coll_in_parent, "/", len(collection), "in collection")
+            # parents_upd_in_coll = [ind.curiosity for ind in parents.values() if ind in collection and ind.curiosity != 0]
+            # print("Parents in collection with curiosity != 0:")
+            # print(parents_upd_in_coll)
 
             # Log metrics
             sum_quality = sum([ind.fit for ind in collection])

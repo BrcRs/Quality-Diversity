@@ -328,7 +328,7 @@ class Archive(Container):
                         # add it
                         pop.append(toolbox.clone(i))
                         # update curiosity
-                        curio.setdefault(hash_ind(ind), 0)
+                        curio.setdefault(hash_ind(i), 0)
                         if hash_ind(i) in curio.keys():
                             curio[hash_ind(i)] += 1
                     elif (sec_nearest == None or np.linalg.norm(np.array(i.bd)-np.array(sec_nearest.bd)) > _l) and eps_dominate(i, nearest, eps):

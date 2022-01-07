@@ -314,18 +314,18 @@ class Experiment:
                         episode_log[k] = info[k]
                     else:
                         episode_log[k] += info[k]
-            if(dump):
-                for k in f.keys():
-                    if (isinstance(info[k], list) or isinstance(info[k], tuple)):
-                        data=" ".join(map(str,info[k]))
-                    else:
-                        data=str(info[k])
-                    f[k].write(data+"\n")
+            # if(dump):
+            #     for k in f.keys():
+            #         if (isinstance(info[k], list) or isinstance(info[k], tuple)):
+            #             data=" ".join(map(str,info[k]))
+            #         else:
+            #             data=str(info[k])
+            #         f[k].write(data+"\n")
             if(done):
                 break
-        if (dump):
-            for k in f.keys():
-                f[k].close()
+        # if (dump):
+        #     for k in f.keys():
+        #         f[k].close()
 
         if (self.custom_env["episode_reward_kind"] == "final"):
             episode_reward=reward

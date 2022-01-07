@@ -281,17 +281,17 @@ class Experiment:
         observation = env.reset()
         observation, reward, done, info = env.step([0]*self.custom_env["nb_output"]) # if we forget that, the initial perception may be different from one eval to another... 
         #print("First observation: "+str(observation)+" first pos: "+str(env.get_robot_pos()))
-        if (dump):
-            f={}
-            for k in info.keys():
-                fn=resdir+"/traj_"+k+"_"+name+".log"
-                if (os.path.exists(fn)):
-                    cpt=1
-                    fn=resdir+"/traj_"+k+"_"+name+"_%d.log"%(cpt)
-                    while (os.path.exists(fn)):
-                        cpt+=1
-                        fn=resdir+"/traj_"+k+"_"+name+"_%d.log"%(cpt)
-                f[k]=open(fn,"w")
+        # if (dump):
+        #     f={}
+        #     for k in info.keys():
+        #         fn=resdir+"/traj_"+k+"_"+name+".log"
+        #         if (os.path.exists(fn)):
+        #             cpt=1
+        #             fn=resdir+"/traj_"+k+"_"+name+"_%d.log"%(cpt)
+        #             while (os.path.exists(fn)):
+        #                 cpt+=1
+        #                 fn=resdir+"/traj_"+k+"_"+name+"_%d.log"%(cpt)
+        #         f[k]=open(fn,"w")
 
         action_scale_factor = env.action_space.high
 

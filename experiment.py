@@ -494,7 +494,7 @@ class Experiment:
 
         ## Update the parents' curiosity
         container = {"archive" : archive, "grid" : grid}
-        for ind in container[self.custom_env["container"]].pop:
+        for ind in container[self.custom_env["container"]].get_pop():
             if hash_ind(ind) in parents.keys():
                 ind.curiosity = max(0, ind.curiosity + curio[hash_ind(ind)])
                 del curio[hash_ind(ind)]
@@ -575,7 +575,7 @@ class Experiment:
 
 
             ## Choice of the collection
-            collection = container[self.custom_env["container"]].pop.copy()
+            collection = container[self.custom_env["container"]].get_pop().copy()
 
             pq = []
             #### From population

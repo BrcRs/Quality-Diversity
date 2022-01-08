@@ -40,3 +40,7 @@ You can then launch your own experiments, for instance:
     python3 experiment.py container=archive selection=noselection nov_add_strategy=Cully nb_gen=500 archive_density=6 nowarning
 
 The experiment will produce a file named `progress.log` which, for each iteration, shows the size of the collection (whether that be archive or grid), the sum of all fitness, the sum of all novelty and the best fitness found in the current collection.
+
+## Authors
+B. Rose (@BrcRs)
+G. Amairi (@ghada-source)

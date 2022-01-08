@@ -42,5 +42,5 @@ You can then launch your own experiments, for instance:
 The experiment will produce a file named `progress.log` which, for each iteration, shows the size of the collection (whether that be archive or grid), the sum of all fitness, the sum of all novelty and the best fitness found in the current collection.
 
 ## Authors
-B. Rose (@BrcRs)
+B. Rose (@BrcRs)     
 G. Amairi (@ghada-source)

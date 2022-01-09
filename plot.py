@@ -49,7 +49,7 @@ def plot_navigation():
     ## Navigation
     filenames = [
         ("progress-archive-nosel (2).log", "no_selection"), 
-        ("progress-archive-pareto-NSLC (2).log", "NSLC"),
+        ("progress-archive-pareto-NSLC (2).log", "pareto"),
         ("progress-archive-pop-curiosity.log", "pop_curiosity"),
         ("progress-archive-pop-FIT.log", "pop_fitness"),
         ("progress-archive-pop-NS.log", "pop_novelty"),
@@ -89,7 +89,7 @@ def plot_robot_arm():
     ## Robot arm
     filenames = [
         ("progress-archive-noselection.dat", "no_selection"), 
-        ("progress-archive-pareto.dat", "NSLC"),
+        ("progress-archive-pareto.dat", "pareto"),
         ("progress-archive-pop-curiosity.dat", "pop_curiosity"),
         ("progress-archive-pop-fitness.dat", "pop_fitness"),
         # ("progress-archive-pop-novelty.dat", "pop_novelty"),
@@ -106,9 +106,9 @@ def plot_robot_arm():
         size,sum_qual,sum_nov,max_qual = recup_robotarm(name[0])
         # try:
         data['size'][name[1]] = [int(s) for s in size]
-        data['sum_qual'][name[1]] = [-float(s) for s in sum_qual] #sum_qual.copy()
+        data['sum_qual'][name[1]] = [float(s) for s in sum_qual] #sum_qual.copy()
         data['sum_nov'][name[1]] = [float(s) for s in sum_nov]#sum_nov.copy()
-        data['max_qual'][name[1]] = [-float(s) for s in max_qual]#max_qual.copy()
+        data['max_qual'][name[1]] = [float(s) for s in max_qual]#max_qual.copy()
         # except ValueError:
         #     print(sum_qual)
         #     print(sum_nov)

@@ -36,9 +36,9 @@ def recup_robotarm(fichier):
       x= myline.split(' ')
     #   print (len(x),x)
       size.append(x[1])
-      sum_qual.append(x[3])
-      sum_nov.append(x[4])
-      max_qual.append(x[7])
+      max_qual.append(x[3])
+      sum_qual.append(x[4])
+      sum_nov.append(x[7])
     #   print(myline)
       i += 1
 
@@ -83,53 +83,10 @@ def plot_navigation():
         plt.legend()
         plt.grid(True)
         plt.show()
-    # metric = 'size'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'sum_qual'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'sum_nov'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'max_qual'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
 
 def plot_robot_arm():
     
-    ## Navigation
+    ## Robot arm
     filenames = [
         ("progress-archive-noselection.dat", "no_selection"), 
         ("progress-archive-pareto.dat", "NSLC"),
@@ -167,49 +124,6 @@ def plot_robot_arm():
         plt.legend()
         plt.grid(True)
         plt.show()
-    # metric = 'size'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'sum_qual'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'sum_nov'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
-
-    # metric = 'max_qual'
-    # for name in filenames:
-    #     plt.plot(x, data[metric][name[1]], label=name[1])
-    # plt.xlabel('Number of Iterations')
-    # # plt.set_xticks(range(0, nb_gen, 100))
-    # # plt.ylabel('y label')
-    # plt.title(metric)
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
 
 def main():
     # plot_navigation()

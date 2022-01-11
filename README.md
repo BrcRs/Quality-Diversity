@@ -37,7 +37,7 @@ Show the available parameters with:
 
 You can then launch your own experiments, for instance:
 
-    python3 experiment.py container=archive selection=score quality=curiosity nb_gen=1000 nov_add_strategy=Cully archive_density=6 nowarning
+    python3 experiment.py container=archive selection=score quality=curiosity nb_gen=100 nov_add_strategy=Cully archive_density=6 nowarning
 
 The experiment will produce a file named `progress.log` which, for each iteration, shows the size of the collection (whether that be archive or grid), the sum of all fitness, the sum of all novelty and the best fitness found in the current collection.
 
